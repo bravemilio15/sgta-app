@@ -1,1 +1,1 @@
-# Sistema-Gestor-de-Tareas-Acad-micas-SGTA-
+# SGTA-APP
