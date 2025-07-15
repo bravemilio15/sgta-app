@@ -1,0 +1,49 @@
+.sgta-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background: #1a2327;
+  color: #fff;
+  padding: 0.5rem 2rem;
+  border-bottom: 6px solid #3b4a56;
+}
+.sgta-header__left {
+  display: flex;
+  align-items: center;
+}
+.sgta-header__logo {
+  width: 60px;
+  height: 60px;
+  margin-right: 1rem;
+  background: #fff;
+  border-radius: 50%;
+  object-fit: contain;
+  border: 2px solid #e0e0e0;
+}
+.sgta-header__title {
+  font-size: 1.5rem;
+  font-weight: bold;
+  margin: 0;
+}
+.sgta-header__subtitle {
+  font-size: 1rem;
+  color: #b6e0fa;
+  margin: 0;
+}
+.sgta-header__right {
+  display: flex;
+  align-items: center;
+}
+.sgta-header__home-btn {
+  background: #1a2327;
+  color: #fff;
+  border: none;
+  font-size: 1rem;
+  padding: 0.5rem 1.2rem;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+.sgta-header__home-btn:hover {
+  background: #3b4a56;
+}

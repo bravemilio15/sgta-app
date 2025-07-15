@@ -1,0 +1,101 @@
+/* Fondo general */
+.login-bg {
+  min-height: 100vh;
+  min-width: 100vw;
+  background: #928d8d;
+  display: flex;
+  flex-direction: column;
+}
+
+/* Centrado del main */
+.login-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+/* Tarjeta de login */
+.login-card {
+  background: #fff;
+  padding: 2.5rem 2.5rem 1.5rem 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  min-width: 350px;
+  max-width: 400px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.login-title {
+  color: #e53935;
+  font-size: 1.3rem;
+  font-weight: bold;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.login-form {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.login-form label {
+  font-size: 0.95rem;
+  margin-bottom: 0.2rem;
+  margin-top: 0.7rem;
+  color: #222;
+}
+
+.login-input {
+  width: 100%;
+  padding: 0.5rem 0.7rem;
+  border: 1px solid #b6b6b6;
+  border-radius: 5px;
+  margin-bottom: 0.2rem;
+  font-size: 1rem;
+  background: #eaf3fa;
+}
+
+.login-remember {
+  display: flex;
+  align-items: center;
+  margin: 0.7rem 0 1rem 0;
+  font-size: 0.95rem;
+}
+
+.login-remember input[type="checkbox"] {
+  margin-right: 0.5rem;
+}
+
+.login-actions {
+  display: flex;
+  justify-content: space-between;
+  margin-top: 0.7rem;
+  gap: 0.5rem;
+}
+
+.login-register {
+  margin-top: 1.2rem;
+  text-align: center;
+  font-size: 0.9rem;
+}
+
+.login-register a {
+  color: #222;
+  font-weight: bold;
+  text-decoration: underline;
+}
+
+/* Ajuste para que el login-card no se corte en pantallas pequeñas */
+@media (max-width: 500px) {
+  .login-card {
+    min-width: unset;
+    max-width: 95vw;
+    padding: 1rem;
+  }
+} 
