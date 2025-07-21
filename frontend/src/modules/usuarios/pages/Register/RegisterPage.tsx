@@ -62,25 +62,21 @@ const RegisterPage = () => {
         <section className="register-card">
           <h2 className="register-title">REGISTRO ESTUDIANTE</h2>
           <form className="register-form" style={{ alignItems: 'center', justifyContent: 'center', width: '100%' }} onSubmit={handleSubmit}>
-            <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
-              <div style={{ flex: 1 }}>
-                <label htmlFor="firstName">Primer Nombre:</label>
-                <input id="firstName" type="text" className="register-input" value={primerNombre} onChange={e => setPrimerNombre(e.target.value)} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label htmlFor="secondName">Segundo Nombre:</label>
-                <input id="secondName" type="text" className="register-input" value={segundoNombre} onChange={e => setSegundoNombre(e.target.value)} />
-              </div>
+            <div style={{ width: '100%' }}>
+              <label htmlFor="firstName">Primer Nombre:</label>
+              <input id="firstName" type="text" className="register-input" value={primerNombre} onChange={e => setPrimerNombre(e.target.value)} />
             </div>
-            <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
-              <div style={{ flex: 1 }}>
-                <label htmlFor="firstLastName">Primer Apellido:</label>
-                <input id="firstLastName" type="text" className="register-input" value={primerApellido} onChange={e => setPrimerApellido(e.target.value)} />
-              </div>
-              <div style={{ flex: 1 }}>
-                <label htmlFor="secondLastName">Segundo Apellido:</label>
-                <input id="secondLastName" type="text" className="register-input" value={segundoApellido} onChange={e => setSegundoApellido(e.target.value)} />
-              </div>
+            <div style={{ width: '100%' }}>
+              <label htmlFor="secondName">Segundo Nombre:</label>
+              <input id="secondName" type="text" className="register-input" value={segundoNombre} onChange={e => setSegundoNombre(e.target.value)} />
+            </div>
+            <div style={{ width: '100%' }}>
+              <label htmlFor="firstLastName">Primer Apellido:</label>
+              <input id="firstLastName" type="text" className="register-input" value={primerApellido} onChange={e => setPrimerApellido(e.target.value)} />
+            </div>
+            <div style={{ width: '100%' }}>
+              <label htmlFor="secondLastName">Segundo Apellido:</label>
+              <input id="secondLastName" type="text" className="register-input" value={segundoApellido} onChange={e => setSegundoApellido(e.target.value)} />
             </div>
             <label htmlFor="identification" style={{ width: '100%' }}>Identificación:</label>
             <div style={{ display: 'flex', gap: '0.5rem', width: '100%' }}>
@@ -118,4 +114,4 @@ const RegisterPage = () => {
   );
 };
 
-export default RegisterPage; 
+export default RegisterPage;
