@@ -175,3 +175,15 @@
 .login-input::-ms-input-placeholder {
   color: #888;
 }
+
+.register-link {
+  color: #000;
+  font-weight: bold;
+  text-decoration: underline;
+  transition: transform 0.15s, text-shadow 0.15s;
+}
+
+.register-link:hover {
+  transform: scale(1.04);
+  text-shadow: 0 1px 3px rgba(0,0,0,0.10);
+}
