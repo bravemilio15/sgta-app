@@ -1,0 +1,127 @@
+.paneladmin-bg {
+  min-height: 100vh;
+  min-width: 100vw;
+  background: #928d8d;
+  display: flex;
+  flex-direction: column;
+}
+
+.paneladmin-main {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+}
+
+.paneladmin-card {
+  background: #fff;
+  padding: 2.5rem 2.5rem 1.5rem 2.5rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  min-width: 350px;
+  max-width: 500px;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.paneladmin-title {
+  color: #1a3fa6;
+  font-size: 2rem;
+  font-weight: bold;
+  margin-bottom: 2rem;
+  text-align: center;
+}
+
+.paneladmin-welcome {
+  color: #222;
+  font-size: 1.1rem;
+  margin-bottom: 0.7rem;
+  text-align: center;
+}
+
+.paneladmin-info {
+  color: #3b4a56;
+  font-size: 1rem;
+  text-align: center;
+}
+
+.paneladmin-dashboard {
+  display: flex;
+  min-height: 100vh;
+  min-width: 100vw;
+  background: #928d8d;
+}
+
+.paneladmin-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  padding: 2.5rem 0 0 0;
+  background: #f5f6fa;
+  min-height: 100vh;
+  min-width: 0;
+}
+
+.paneladmin-section {
+  background: #fff;
+  border-radius: 12px;
+  padding: 2rem;
+  margin-top: 0;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  width: 90%;
+  max-width: 1100px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+}
+
+.paneladmin-table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 1rem;
+}
+
+.paneladmin-table th, .paneladmin-table td {
+  padding: 0.7rem 1rem;
+  border-bottom: 1px solid #e0e0e0;
+  text-align: left;
+}
+
+.paneladmin-table th {
+  background: #1a3fa6;
+  color: #fff;
+}
+
+.paneladmin-table td {
+  color: #222;
+  font-size: 1rem;
+  background: #fff;
+}
+
+.paneladmin-table tr:last-child td {
+  border-bottom: none;
+}
+
+@media (max-width: 900px) {
+  .paneladmin-content {
+    padding: 1rem 0.5rem;
+  }
+  .paneladmin-section {
+    padding: 1rem;
+    width: 98%;
+    max-width: 98vw;
+  }
+}
+
+@media (max-width: 500px) {
+  .paneladmin-section {
+    min-width: unset;
+    max-width: 99vw;
+    padding: 0.5rem;
+  }
+} 
