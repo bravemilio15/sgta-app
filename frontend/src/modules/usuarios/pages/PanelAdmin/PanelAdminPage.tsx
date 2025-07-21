@@ -1,20 +1,66 @@
-import React, { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useUser } from '../../../../context/UserContext';
+import Sidebar from '../../../../shared/components/Sidebar/Sidebar';
+import Button from '../../../../shared/components/Button';
+import { obtenerUsuariosPendientes, aprobarUsuario } from '../../../../api';
+import './PanelAdminPage.css';
 
 const PanelAdminPage = () => {
   const { user, loading } = useUser();
+  const [pendientes, setPendientes] = useState<any[]>([]);
+  const [cargando, setCargando] = useState(true);
 
-  if (loading) return <div>Cargando...</div>;
+  useEffect(() => {
+    if (user && user.tipo === 'administrador') {
+      obtenerUsuariosPendientes().then(setPendientes).finally(() => setCargando(false));
+    }
+  }, [user]);
+
+  const handleAprobar = async (uid: string) => {
+    await aprobarUsuario(uid);
+    setPendientes(pendientes.filter(u => u.uid !== uid));
+  };
+
+  if (loading || cargando) return <div className="paneladmin-bg"><div className="paneladmin-main">Cargando...</div></div>;
   if (!user || user.tipo !== 'administrador') {
-    return <div style={{ color: 'red', textAlign: 'center', marginTop: '2rem' }}>Acceso denegado. Solo administradores pueden ver este panel.</div>;
+    return <div className="paneladmin-bg"><div className="paneladmin-main" style={{ color: 'red', textAlign: 'center', marginTop: '2rem' }}>Acceso denegado. Solo administradores pueden ver este panel.</div></div>;
   }
 
   return (
-    <div style={{ maxWidth: 500, margin: '2rem auto', padding: 24, border: '1px solid #ccc', borderRadius: 8, background: '#fff', textAlign: 'center' }}>
-      <h2>Panel de Administrador</h2>
-      <p>Bienvenido, <b>{user.correo}</b></p>
-      <p>Solo los usuarios con tipo <b>administrador</b> pueden acceder a este panel.</p>
-      {/* + */}
+    <div className="paneladmin-dashboard">
+      <Sidebar />
+      <main className="paneladmin-content">
+        <h2 className="paneladmin-title">Panel de Administrador</h2>
+        <section className="paneladmin-section">
+          <h3>Estudiantes Pendientes</h3>
+          {pendientes.length === 0 ? (
+            <p>No hay estudiantes pendientes.</p>
+          ) : (
+            <table className="paneladmin-table">
+              <thead>
+                <tr>
+                  <th>Nombre</th>
+                  <th>Correo</th>
+                  <th>Identificación</th>
+                  <th>Acción</th>
+                </tr>
+              </thead>
+              <tbody>
+                {pendientes.map(est => (
+                  <tr key={est.uid}>
+                    <td>{est.nombreCompleto}</td>
+                    <td>{est.correoInstitucional}</td>
+                    <td>{est.identificacion}</td>
+                    <td>
+                      <Button onClick={() => handleAprobar(est.uid)}>Aprobar</Button>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          )}
+        </section>
+      </main>
     </div>
   );
 };

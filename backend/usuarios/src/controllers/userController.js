@@ -2,6 +2,7 @@ const { crearUsuarioAuth, guardarUsuarioEnFirestore } = require('../services/fir
 const { Usuario, Administrador, Docente, EstadoRegistro } = require('../models/usuario');
 const admin = require('firebase-admin');
 const { enviarCorreo } = require('../services/mailService');
+const bcrypt = require('bcryptjs');
 
 // Controlador para registrar un usuario
 async function registrarUsuario(req, res) {
@@ -14,19 +15,23 @@ async function registrarUsuario(req, res) {
       identificacion,
       tipoIdentificacion,
       asignatura,
-      correoUsuario // parte antes del @
+      correoUsuario, // parte antes del @
+      password // opcional
     } = req.body;
 
     // Construir correo institucional
-    const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
+    const correoInstitucional = req.body.correo || `${correoUsuario}@uni.edu.ec`;
     // Generar nombre completo
     const nombreCompleto = `${primerNombre} ${segundoNombre} ${primerApellido} ${segundoApellido}`.replace(/  +/g, ' ').trim();
     // Fecha de creación
     const fechaPerf = new Date().toISOString();
 
-    // Crear usuario en Auth (contraseña temporal aleatoria)
-    const password = Math.random().toString(36).slice(-8) + 'A1'; // Ejemplo simple
-    const userRecord = await crearUsuarioAuth(correoInstitucional, password);
+    // Usar la contraseña proporcionada o generar una aleatoria
+    const plainPassword = password || (Math.random().toString(36).slice(-8) + 'A1');
+    // Crear usuario en Auth
+    const userRecord = await crearUsuarioAuth(correoInstitucional, plainPassword);
+    // Hashear la contraseña para guardar en Firestore
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
 
     // Crear objeto usuario
     const usuario = {
@@ -36,7 +41,9 @@ async function registrarUsuario(req, res) {
       tipoIdentificacion,
       asignatura,
       fechaPerf,
-      estadoRegistro: EstadoRegistro.PENDIENTE
+      estadoRegistro: EstadoRegistro.PENDIENTE,
+      tipo: 'estudiante',
+      passwordHash: hashedPassword
     };
 
     // Guardar en Firestore
@@ -46,7 +53,7 @@ async function registrarUsuario(req, res) {
       message: 'Usuario registrado correctamente',
       uid: userRecord.uid,
       correoInstitucional,
-      passwordTemporal: password // En producción, envía por correo seguro
+      passwordTemporal: plainPassword // En producción, envía por correo seguro
     });
   } catch (error) {
     console.error('Error al registrar usuario:', error);
@@ -58,7 +65,7 @@ async function registrarUsuario(req, res) {
 async function aprobarUsuario(req, res) {
   try {
     const { uid } = req.body;
-    // Nueva contraseña generada (puedes personalizar esto)
+    // Generar nueva contraseña temporal
     const nuevaPassword = Math.random().toString(36).slice(-8) + 'A1';
 
     // Cambiar estado en Firestore
@@ -68,10 +75,15 @@ async function aprobarUsuario(req, res) {
     // Actualizar contraseña en Auth
     await admin.auth().updateUser(uid, { password: nuevaPassword });
 
+    // Cifrar la nueva contraseña y actualizar en Firestore
+    const hashedPassword = await bcrypt.hash(nuevaPassword, 10);
+    await db.collection('usuarios').doc(uid).update({ passwordHash: hashedPassword });
 
+    // Obtener correo del usuario
     const usuarioDoc = await db.collection('usuarios').doc(uid).get();
     const correo = usuarioDoc.data().correoInstitucional;
 
+    // Enviar correo con la contraseña temporal
     await enviarCorreo(
       correo,
       'Tu cuenta ha sido aprobada',
@@ -96,25 +108,28 @@ async function registrarAdministrador(req, res) {
       nombreCompleto,
       correoUsuario,
       identificacion,
-      tipoIdentificacion
+      tipoIdentificacion,
+      password // opcional
     } = req.body;
-    const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
+    const correoInstitucional = req.body.correo || `${correoUsuario}@uni.edu.ec`;
     const fechaPerf = new Date().toISOString();
-    const password = Math.random().toString(36).slice(-8) + 'A1';
-    const userRecord = await crearUsuarioAuth(correoInstitucional, password);
+    const plainPassword = password || (Math.random().toString(36).slice(-8) + 'A1');
+    const userRecord = await crearUsuarioAuth(correoInstitucional, plainPassword);
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
     const admin = new Administrador({
       nombreCompleto,
       correoInstitucional,
       identificacion,
       tipoIdentificacion,
-      fechaPerf
+      fechaPerf,
+      passwordHash: hashedPassword
     });
     await guardarUsuarioEnFirestore(userRecord.uid, { ...admin });
     res.status(201).json({
       message: 'Administrador registrado correctamente',
       uid: userRecord.uid,
       correoInstitucional,
-      passwordTemporal: password
+      passwordTemporal: plainPassword
     });
   } catch (error) {
     console.error('Error al registrar administrador:', error);
@@ -171,4 +186,17 @@ async function obtenerUsuarioPorUid(req, res) {
   }
 }
 
-module.exports = { registrarUsuario, aprobarUsuario, registrarAdministrador, registrarDocente, obtenerUsuarioPorUid };
+// Obtener usuarios pendientes
+async function obtenerUsuariosPendientes(req, res) {
+  try {
+    const db = admin.firestore();
+    const snapshot = await db.collection('usuarios').where('estadoRegistro', '==', 'Pendiente').get();
+    const usuarios = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+    res.json(usuarios);
+  } catch (error) {
+    console.error('Error al obtener usuarios pendientes:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+module.exports = { registrarUsuario, aprobarUsuario, registrarAdministrador, registrarDocente, obtenerUsuarioPorUid, obtenerUsuariosPendientes };

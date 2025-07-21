@@ -24,3 +24,8 @@ export async function obtenerUsuarioPorUid(uid: string) {
   return response.json();
 }
 
+export async function obtenerUsuariosPendientes() {
+  const response = await fetch(`${API_BASE}/usuarios?estado=Pendiente`);
+  return response.json();
+}
+

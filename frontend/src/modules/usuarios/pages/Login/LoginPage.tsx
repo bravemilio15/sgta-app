@@ -3,13 +3,7 @@ import Button from '../../../../shared/components/Button';
 import './LoginPage.css';
 import { Link, useNavigate } from 'react-router-dom';
 import { obtenerUsuarioPorUid } from '../../../../api';
-
-// Simulación de autenticación con usuario admin
-const usuarioAdminSimulado = {
-  uid: 'adminUID',
-  correo: 'admin@admin.com',
-  password: 'admin1',
-};
+import { signInWithEmailAndPassword, getAuth } from 'firebase/auth';
 
 const LoginPage = () => {
   const navigate = useNavigate();
@@ -20,20 +14,26 @@ const LoginPage = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setMensaje('');
-    // Simulación: si coincide con admin, obtener tipo y redirigir
-    if (username === usuarioAdminSimulado.correo && password === usuarioAdminSimulado.password) {
-      // Simula obtener el tipo desde el backend
-      // En producción, deberías autenticar y obtener el uid real
-      const datos = await obtenerUsuarioPorUid(usuarioAdminSimulado.uid);
+    const auth = getAuth();
+    try {
+      console.log('Intentando login con:', username, password);
+      const userCredential = await signInWithEmailAndPassword(auth, username, password);
+      console.log('Login exitoso:', userCredential);
+      const uid = userCredential.user.uid;
+      const datos = await obtenerUsuarioPorUid(uid);
+      console.log('Datos usuario backend:', datos);
       if (datos && datos.tipo === 'administrador') {
         navigate('/panel-admin');
         return;
-      } else {
-        setMensaje('No tienes permisos de administrador.');
+      }
+      if (datos && datos.tipo === 'estudiante') {
+        navigate('/tareas/menu/inicio-estudiante');
         return;
       }
+    } catch (error: any) {
+      console.log('Error en login:', error);
+      setMensaje('Error: ' + (error.message || 'No se pudo iniciar sesión.'));
     }
-    setMensaje('Credenciales incorrectas.');
   };
 
   return (

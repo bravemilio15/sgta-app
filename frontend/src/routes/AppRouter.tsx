@@ -4,9 +4,11 @@ import { TareasPage } from '../modules/tareas';
 import { ReportesPage } from '../modules/reportes';
 import { NotificacionesPage } from '../modules/notificaciones';
 import { RegisterPage } from '../modules/usuarios';
+import PanelAdminPage from '../modules/usuarios/pages/PanelAdmin/PanelAdminPage';
 import Header from '../shared/components/Header';
 import Footer from '../shared/components/Footer';
 import '../index.css';
+import InicioEstudiantePage from '../modules/tareas/menu/InicioEstudiantePage';
 
 export default function AppRouter() {
   return (
@@ -21,6 +23,8 @@ export default function AppRouter() {
             <Route path="/tareas" element={<TareasPage />} />
             <Route path="/reportes" element={<ReportesPage />} />
             <Route path="/notificaciones" element={<NotificacionesPage />} />
+            <Route path="/panel-admin" element={<PanelAdminPage />} />
+            <Route path="/tareas/menu/inicio-estudiante" element={<InicioEstudiantePage />} />
             <Route path="*" element={<div style={{textAlign:'center',marginTop:'2rem'}}>Página no encontrada</div>} />
           </Routes>
         </BrowserRouter>
