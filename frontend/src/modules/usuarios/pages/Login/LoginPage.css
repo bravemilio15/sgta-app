@@ -21,7 +21,7 @@
   background: #fff;
   padding: 2.5rem 2.5rem 1.5rem 2.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10);
   min-width: 350px;
   max-width: 400px;
   width: 100%;
@@ -66,10 +66,12 @@
   align-items: center;
   margin: 0.7rem 0 1rem 0;
   font-size: 0.95rem;
+  gap: 0.5rem;
 }
 
 .login-remember input[type="checkbox"] {
-  margin-right: 0.5rem;
+  margin: 0;
+  /* Elimina vertical-align, flex ya alinea */
 }
 
 .login-actions {
@@ -79,16 +81,55 @@
   gap: 0.5rem;
 }
 
-.login-register {
+.login-regiter {
   margin-top: 1.2rem;
   text-align: center;
   font-size: 0.9rem;
 }
 
 .login-register a {
-  color: #222;
+  color: #000;
   font-weight: bold;
   text-decoration: underline;
+  transition: transform 0.15s;
+}
+
+.login-register a:hover {
+  transform: translateY(-1px) scale(1.01);
+  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
+  /* Mantener color original */
+}
+
+/* Botón de registro */
+.register-btn {
+  background: #e53935;
+  color: #fff !important;
+  padding: 0.3rem 1.1rem;
+  border-radius: 5px;
+  font-weight: bold;
+  text-decoration: none !important;
+  margin-left: 0.3rem;
+  display: inline-block;
+  transition: background 0.2s;
+}
+
+.register-btn:hover {
+  background: #b71c1c;
+  color: #fff !important;
+}
+
+/* Realce para botones al pasar el mouse */
+.login-form button:hover,
+.login-actions button:hover {
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.10);
+  transform: scale(1.01);
+  transition: box-shadow 0.15s, transform 0.15s;
+}
+
+.login-form button:hover {
+  transform: translateY(-2px) scale(1.03);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.10);
+  /* No cambiar color */
 }
 
 /* Ajuste para que el login-card no se corte en pantallas pequeñas */
@@ -98,4 +139,39 @@
     max-width: 95vw;
     padding: 1rem;
   }
-} 
+}
+
+.login-input,
+.login-input:-webkit-autofill,
+.login-input:-webkit-autofill:focus,
+.login-input:-webkit-autofill:hover,
+.login-input:-webkit-autofill:active {
+  color: #222 !important;
+  -webkit-text-fill-color: #222 !important;
+  caret-color: #222 !important;
+  background-color: #eaf3fa !important;
+  box-shadow: 0 0 0 1000px #eaf3fa inset !important;
+  transition: background-color 5000s ease-in-out 0s;
+}
+
+.login-input::selection {
+  background: #b6b6b6;
+  color: #222;
+}
+
+.login-input::placeholder {
+  color: #888;
+  opacity: 1;
+}
+
+.login-input::-webkit-input-placeholder {
+  color: #888;
+}
+
+.login-input:-ms-input-placeholder {
+  color: #888;
+}
+
+.login-input::-ms-input-placeholder {
+  color: #888;
+}

@@ -28,11 +28,18 @@ const LoginPage = () => (
           </div>
         </form>
         <div className="login-register" style={{ textAlign: 'center', width: '100%' }}>
-          <span>¿No tienes cuenta? <Link to="/usuarios/registro" style={{ color: '#222', fontWeight: 'bold', textDecoration: 'underline' }}>Regístrate</Link></span>
+          <span style={{ color: '#000' }}>
+            ¿No tienes cuenta?{' '}
+            <Link
+              to="/usuarios/registro"
+            >
+              Regístrate
+            </Link>
+          </span>
         </div>
       </section>
     </main>
   </div>
 );
 
-export default LoginPage; 
+export default LoginPage;
