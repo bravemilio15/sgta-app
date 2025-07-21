@@ -1,6 +1,8 @@
 const { crearUsuarioAuth, guardarUsuarioEnFirestore } = require('../services/firebaseService');
 const { Usuario, EstadoRegistro } = require('../models/usuario');
+const admin = require('firebase-admin');
 
+// Controlador para registrar un usuario
 async function registrarUsuario(req, res) {
   try {
     const {
@@ -26,7 +28,7 @@ async function registrarUsuario(req, res) {
     const userRecord = await crearUsuarioAuth(correoInstitucional, password);
 
     // Crear objeto usuario
-    const usuario = new Usuario({
+    const usuario = {
       nombreCompleto,
       correoInstitucional,
       identificacion,
@@ -34,7 +36,7 @@ async function registrarUsuario(req, res) {
       asignatura,
       fechaPerf,
       estadoRegistro: EstadoRegistro.PENDIENTE
-    });
+    };
 
     // Guardar en Firestore
     await guardarUsuarioEnFirestore(userRecord.uid, usuario);
@@ -51,4 +53,35 @@ async function registrarUsuario(req, res) {
   }
 }
 
-module.exports = { registrarUsuario };
+// Controlador para aprobar usuario y generar nueva contraseña o link de restablecimiento
+async function aprobarUsuario(req, res) {
+  try {
+    const { uid } = req.body;
+    // Nueva contraseña generada (puedes personalizar esto)
+    const nuevaPassword = Math.random().toString(36).slice(-8) + 'A1';
+
+    // Cambiar estado en Firestore
+    const db = admin.firestore();
+    await db.collection('usuarios').doc(uid).update({ estadoRegistro: EstadoRegistro.APROBADO });
+
+    // Actualizar contraseña en Auth
+    await admin.auth().updateUser(uid, { password: nuevaPassword });
+
+    // (Opcional) Generar link de restablecimiento en vez de asignar contraseña
+    // const usuarioDoc = await db.collection('usuarios').doc(uid).get();
+    // const correo = usuarioDoc.data().correoInstitucional;
+    // const resetLink = await admin.auth().generatePasswordResetLink(correo);
+
+    res.status(200).json({
+      message: 'Usuario aprobado y contraseña generada',
+      uid,
+      nuevaPassword
+      // resetLink // Si usas el link de restablecimiento
+    });
+  } catch (error) {
+    console.error('Error al aprobar usuario:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+module.exports = { registrarUsuario, aprobarUsuario };
