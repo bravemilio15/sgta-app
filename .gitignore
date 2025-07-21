@@ -61,3 +61,6 @@ report.[0-9]*.[0-9]*.[0-9]*.[0-9]*.json
 # Otros
 *.tgz
 .vscode-test
+
+# Ignorar claves y configuraciones de Firebase
+firebase/*.json

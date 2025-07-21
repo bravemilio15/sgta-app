@@ -1,12 +1,16 @@
 const express = require('express');
 const app = express();
 const PORT = process.env.PORT || 3004;
-const { app: firebaseApp } = require('../../firebase/firebase');
+const userRoutes = require('./routes/userRoutes');
 
-//prueba
+app.use(express.json()); // Middleware para JSON
+
 app.get('/', (req, res) => {
   res.send('Microservicio de usuarios funcionando');
 });
+
+// Rutas de usuario
+app.use('/api/usuarios', userRoutes);
 
 app.listen(PORT, () => {
   console.log(`Funcionando en: ${PORT}`);

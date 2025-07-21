@@ -1,7 +1,8 @@
 {
   "dependencies": {
     "dotenv": "^17.2.0",
-    "firebase": "^12.0.0"
+    "firebase": "^12.0.0",
+    "firebase-admin": "^13.4.0"
   },
   "scripts": {
     "dev:usuarios": "nodemon usuarios/src/index.js"

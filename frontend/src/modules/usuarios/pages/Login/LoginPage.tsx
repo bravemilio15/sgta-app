@@ -1,6 +1,7 @@
 import React from 'react';
 import Button from '../../../../shared/components/Button';
 import './LoginPage.css';
+import { Link } from 'react-router-dom';
 
 const LoginPage = () => (
   <div className="login-bg">
@@ -26,8 +27,8 @@ const LoginPage = () => (
             <Button type="button" style={{ background: '#3b4a56' }}>Volver</Button>
           </div>
         </form>
-        <div className="login-register">
-          <span>¿No tienes cuenta? <a href="#">Regístrate</a></span>
+        <div className="login-register" style={{ textAlign: 'center', width: '100%' }}>
+          <span>¿No tienes cuenta? <Link to="/usuarios/registro" style={{ color: '#222', fontWeight: 'bold', textDecoration: 'underline' }}>Regístrate</Link></span>
         </div>
       </section>
     </main>
