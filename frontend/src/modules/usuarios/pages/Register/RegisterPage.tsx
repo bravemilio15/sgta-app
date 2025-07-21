@@ -36,7 +36,16 @@ const RegisterPage = () => {
       const res = await registrarUsuario(datos);
       if (res && res.message) {
         setMensaje('¡Registro exitoso! Espera la aprobación de tu cuenta.');
-        // Opcional: limpiar campos o redirigir
+        // Limpiar campos
+        setPrimerNombre('');
+        setSegundoNombre('');
+        setPrimerApellido('');
+        setSegundoApellido('');
+        setIdentificacion('');
+        setTipoIdentificacion('cedula');
+        setAsignatura('procesos');
+        setEmailUser('');
+        // Opcional: limpiar otros estados si agregas más
       } else {
         setMensaje('Error: ' + (res.error || 'No se pudo registrar.'));
       }
@@ -97,7 +106,7 @@ const RegisterPage = () => {
                 value={emailUser}
                 onChange={e => setEmailUser(e.target.value)}
               />
-              <span style={{ flex: 1, color: '#222', fontWeight: 'bold', fontSize: '1rem' }}>@uni.unl.ec</span>
+              <span style={{ flex: 1, color: '#222', fontWeight: 'bold', fontSize: '1rem' }}>@uni.edu.ec</span>
             </div>
             {mensaje && <div style={{ color: mensaje.startsWith('¡Registro') ? 'green' : 'red', marginTop: '1rem', textAlign: 'center' }}>{mensaje}</div>}
             <Button type="submit" style={{ background: '#1a3fa6', color: '#fff', marginTop: '1rem', width: '100%' }} disabled={loading}>{loading ? 'Registrando...' : 'Registrarse'}</Button>

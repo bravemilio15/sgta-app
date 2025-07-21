@@ -5,25 +5,41 @@ const EstadoRegistro = {
   RECHAZADO: 'Rechazado'
 };
 
-// Modelo de Usuario (estructura de datos)
+// Clase base Usuario
 class Usuario {
   constructor({
     nombreCompleto,
     correoInstitucional,
     identificacion,
     tipoIdentificacion,
-    asignatura,
     fechaPerf,
-    estadoRegistro = EstadoRegistro.PENDIENTE
+    estadoRegistro = EstadoRegistro.PENDIENTE,
+    tipo = 'estudiante' // Por defecto
   }) {
     this.nombreCompleto = nombreCompleto;
     this.correoInstitucional = correoInstitucional;
     this.identificacion = identificacion;
     this.tipoIdentificacion = tipoIdentificacion;
-    this.asignatura = asignatura;
     this.fechaPerf = fechaPerf;
     this.estadoRegistro = estadoRegistro;
+    this.tipo = tipo;
   }
 }
 
-module.exports = { Usuario, EstadoRegistro };
+// Clase Administrador
+class Administrador extends Usuario {
+  constructor(props) {
+    super({ ...props, tipo: 'administrador' });
+    // Puedes agregar campos específicos de administrador aquí
+  }
+}
+
+// Clase Docente
+class Docente extends Usuario {
+  constructor(props) {
+    super({ ...props, tipo: 'docente' });
+    // Puedes agregar campos específicos de docente aquí
+  }
+}
+
+module.exports = { Usuario, Administrador, Docente, EstadoRegistro };

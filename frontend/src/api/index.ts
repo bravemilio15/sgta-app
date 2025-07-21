@@ -19,3 +19,8 @@ export async function aprobarUsuario(uid: string) {
   return response.json();
 }
 
+export async function obtenerUsuarioPorUid(uid: string) {
+  const response = await fetch(`${API_BASE}/usuarios/${uid}`);
+  return response.json();
+}
+

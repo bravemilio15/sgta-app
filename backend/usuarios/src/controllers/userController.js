@@ -1,6 +1,7 @@
 const { crearUsuarioAuth, guardarUsuarioEnFirestore } = require('../services/firebaseService');
-const { Usuario, EstadoRegistro } = require('../models/usuario');
+const { Usuario, Administrador, Docente, EstadoRegistro } = require('../models/usuario');
 const admin = require('firebase-admin');
+const { enviarCorreo } = require('../services/mailService');
 
 // Controlador para registrar un usuario
 async function registrarUsuario(req, res) {
@@ -17,7 +18,7 @@ async function registrarUsuario(req, res) {
     } = req.body;
 
     // Construir correo institucional
-    const correoInstitucional = `${correoUsuario}@uni.unl.ec`;
+    const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
     // Generar nombre completo
     const nombreCompleto = `${primerNombre} ${segundoNombre} ${primerApellido} ${segundoApellido}`.replace(/  +/g, ' ').trim();
     // Fecha de creación
@@ -67,16 +68,20 @@ async function aprobarUsuario(req, res) {
     // Actualizar contraseña en Auth
     await admin.auth().updateUser(uid, { password: nuevaPassword });
 
-    // (Opcional) Generar link de restablecimiento en vez de asignar contraseña
-    // const usuarioDoc = await db.collection('usuarios').doc(uid).get();
-    // const correo = usuarioDoc.data().correoInstitucional;
-    // const resetLink = await admin.auth().generatePasswordResetLink(correo);
+
+    const usuarioDoc = await db.collection('usuarios').doc(uid).get();
+    const correo = usuarioDoc.data().correoInstitucional;
+
+    await enviarCorreo(
+      correo,
+      'Tu cuenta ha sido aprobada',
+      `¡Felicidades! Tu cuenta ha sido aprobada. Tu contraseña temporal es: ${nuevaPassword}\nPor favor, cámbiala al iniciar sesión.`
+    );
 
     res.status(200).json({
       message: 'Usuario aprobado y contraseña generada',
       uid,
       nuevaPassword
-      // resetLink // Si usas el link de restablecimiento
     });
   } catch (error) {
     console.error('Error al aprobar usuario:', error);
@@ -84,4 +89,86 @@ async function aprobarUsuario(req, res) {
   }
 }
 
-module.exports = { registrarUsuario, aprobarUsuario };
+// Controlador para registrar un administrador
+async function registrarAdministrador(req, res) {
+  try {
+    const {
+      nombreCompleto,
+      correoUsuario,
+      identificacion,
+      tipoIdentificacion
+    } = req.body;
+    const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
+    const fechaPerf = new Date().toISOString();
+    const password = Math.random().toString(36).slice(-8) + 'A1';
+    const userRecord = await crearUsuarioAuth(correoInstitucional, password);
+    const admin = new Administrador({
+      nombreCompleto,
+      correoInstitucional,
+      identificacion,
+      tipoIdentificacion,
+      fechaPerf
+    });
+    await guardarUsuarioEnFirestore(userRecord.uid, { ...admin });
+    res.status(201).json({
+      message: 'Administrador registrado correctamente',
+      uid: userRecord.uid,
+      correoInstitucional,
+      passwordTemporal: password
+    });
+  } catch (error) {
+    console.error('Error al registrar administrador:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Controlador para registrar un docente
+async function registrarDocente(req, res) {
+  try {
+    const {
+      nombreCompleto,
+      correoUsuario,
+      identificacion,
+      tipoIdentificacion
+    } = req.body;
+    const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
+    const fechaPerf = new Date().toISOString();
+    const password = Math.random().toString(36).slice(-8) + 'A1';
+    const userRecord = await crearUsuarioAuth(correoInstitucional, password);
+    const docente = new Docente({
+      nombreCompleto,
+      correoInstitucional,
+      identificacion,
+      tipoIdentificacion,
+      fechaPerf
+    });
+    await guardarUsuarioEnFirestore(userRecord.uid, { ...docente });
+    res.status(201).json({
+      message: 'Docente registrado correctamente',
+      uid: userRecord.uid,
+      correoInstitucional,
+      passwordTemporal: password
+    });
+  } catch (error) {
+    console.error('Error al registrar docente:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Obtener usuario por uid
+async function obtenerUsuarioPorUid(req, res) {
+  try {
+    const { uid } = req.params;
+    const db = admin.firestore();
+    const usuarioDoc = await db.collection('usuarios').doc(uid).get();
+    if (!usuarioDoc.exists) {
+      return res.status(404).json({ error: 'Usuario no encontrado' });
+    }
+    res.json(usuarioDoc.data());
+  } catch (error) {
+    console.error('Error al obtener usuario por uid:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+module.exports = { registrarUsuario, aprobarUsuario, registrarAdministrador, registrarDocente, obtenerUsuarioPorUid };
