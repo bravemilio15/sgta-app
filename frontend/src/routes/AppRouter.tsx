@@ -2,7 +2,7 @@ import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { UsuariosPage } from '../modules/usuarios';
 import { TareasPage } from '../modules/tareas';
 import { ReportesPage } from '../modules/reportes';
-import { NotificacionesPage } from '../modules/notificaciones';
+import { NotificacionesPage } from '../modules/notificaciones/notificacion-panel';
 import { RegisterPage } from '../modules/usuarios';
 import PanelAdminPage from '../modules/usuarios/pages/PanelAdmin/PanelAdminPage';
 import Header from '../shared/components/Header';
