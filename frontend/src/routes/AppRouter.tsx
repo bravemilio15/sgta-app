@@ -9,6 +9,7 @@ import Header from '../shared/components/Header';
 import Footer from '../shared/components/Footer';
 import '../index.css';
 import InicioEstudiantePage from '../modules/tareas/menu/InicioEstudiantePage';
+import { InicioDocentePage } from '../modules/tareas/pages/InicioDocentePage';
 
 export default function AppRouter() {
   return (
@@ -25,7 +26,7 @@ export default function AppRouter() {
             <Route path="/notificaciones" element={<NotificacionesPage />} />
             <Route path="/panel-admin" element={<PanelAdminPage />} />
             <Route path="/tareas/menu/inicio-estudiante" element={<InicioEstudiantePage />} />
-            <Route path="*" element={<div style={{textAlign:'center',marginTop:'2rem'}}>Página no encontrada</div>} />
+            <Route path="/tareas/menu/inicio-docente" element={<InicioDocentePage />} />            <Route path="*" element={<div style={{textAlign:'center',marginTop:'2rem'}}>Página no encontrada</div>} />
           </Routes>
         </BrowserRouter>
       </main>

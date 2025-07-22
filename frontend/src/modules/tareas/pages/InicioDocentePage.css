@@ -1,0 +1,36 @@
+/* frontend/src/modules/tareas/pages/InicioDocentePage.css */
+
+.tareas-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-top: 20px;
+}
+
+.tareas-table th, .tareas-table td {
+    border: 1px solid #ddd;
+    padding: 8px;
+    text-align: left;
+}
+
+.status-si, .status-no {
+    padding: 5px 10px;
+    color: white;
+    border-radius: 12px;
+}
+
+.status-si {
+    background-color: #28a745; /* Verde */
+}
+
+.status-no {
+    background-color: #dc3545; /* Rojo */
+}
+
+.revisar-btn {
+    background-color: #343a40; /* Gris oscuro */
+    color: white;
+    border: none;
+    padding: 8px 16px;
+    border-radius: 5px;
+    cursor: pointer;
+}
