@@ -1,4 +1,9 @@
 .sgta-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  z-index: 1000;
   display: flex;
   align-items: center;
   justify-content: space-between;
@@ -43,6 +48,7 @@
   border-radius: 8px;
   cursor: pointer;
   transition: background 0.2s;
+  margin-right: 24px;
 }
 .sgta-header__home-btn:hover {
   background: #3b4a56;

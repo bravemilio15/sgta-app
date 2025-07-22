@@ -88,3 +88,13 @@ export async function contarNotificacionesNoLeidas(uid: string) {
   return response.json();
 }
 
+// Docentes
+export async function registrarDocente(datos: any) {
+  const response = await fetch(`${API_BASE}/usuarios/register-docente`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
