@@ -35,7 +35,7 @@ const RegisterPage = () => {
       };
       const res = await registrarUsuario(datos);
       if (res && res.message) {
-        setMensaje('¡Registro exitoso! Espera la aprobación de tu cuenta.');
+        setMensaje('Hola, ¡Registro exitoso! Espera la aprobación de tu cuenta.');
         // Limpiar campos
         setPrimerNombre('');
         setSegundoNombre('');
