@@ -1,4 +1,5 @@
 const API_BASE = 'http://localhost:3004/api';
+const NOTIFICACIONES_API = 'http://localhost:3001/api';
 
 // Usuarios
 export async function registrarUsuario(datos: any) {
@@ -26,6 +27,64 @@ export async function obtenerUsuarioPorUid(uid: string) {
 
 export async function obtenerUsuariosPendientes() {
   const response = await fetch(`${API_BASE}/usuarios?estado=Pendiente`);
+  return response.json();
+}
+
+// Notificaciones
+export async function obtenerNotificaciones(uid: string) {
+  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}`);
+  return response.json();
+}
+
+export async function marcarNotificacionLeida(notificacionId: string) {
+  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/${notificacionId}/leida`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.json();
+}
+
+export async function marcarNotificacionNoLeida(notificacionId: string) {
+  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/${notificacionId}/no-leida`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.json();
+}
+
+export async function eliminarNotificacion(notificacionId: string) {
+  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/${notificacionId}`, {
+    method: 'DELETE'
+  });
+  return response.json();
+}
+
+export async function marcarTodasNotificacionesLeidas(uid: string) {
+  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}/marcar-todas-leidas`, {
+    method: 'PATCH',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.json();
+}
+
+export async function crearNotificacion(datos: {
+  titulo: string;
+  mensaje: string;
+  tipo: 'info' | 'warning' | 'success' | 'error';
+  destinatarioUid: string;
+  remitenteUid?: string;
+  accionUrl?: string;
+}) {
+  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function contarNotificacionesNoLeidas(uid: string) {
+  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}/conteo-no-leidas`);
   return response.json();
 }
 
