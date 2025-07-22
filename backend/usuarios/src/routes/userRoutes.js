@@ -17,6 +17,7 @@ router.get('/', (req, res) => {
   if (req.query.estado === 'Pendiente') {
     return obtenerUsuariosPendientes(req, res);
   }
+  // Si no se proporciona el parámetro de estado, retornar error
   res.status(400).json({ error: 'Parámetro de estado requerido' });
 });
 
