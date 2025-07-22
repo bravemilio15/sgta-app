@@ -56,9 +56,8 @@ const LoginPage = () => {
             {mensaje && <div style={{ color: 'red', marginBottom: 8 }}>{mensaje}</div>}
             <Button type="submit">ACCEDER</Button>
 
-            <div className="login-actions">
+            <div className="login-actions" style={{ display: 'flex', justifyContent: 'center', marginTop: '0.7rem' }}>
               <Button type="button" style={{ background: '#e0e0e0', color: '#222' }}>Olvidé mi contraseña</Button>
-              <Button type="button" style={{ background: '#3b4a56' }}>Volver</Button>
             </div>
           </form>
           <div className="login-register" style={{ textAlign: 'center', width: '100%' }}>

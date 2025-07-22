@@ -144,25 +144,29 @@ async function registrarDocente(req, res) {
       nombreCompleto,
       correoUsuario,
       identificacion,
-      tipoIdentificacion
+      tipoIdentificacion,
+      password // ahora se recibe del frontend
     } = req.body;
     const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
     const fechaPerf = new Date().toISOString();
-    const password = Math.random().toString(36).slice(-8) + 'A1';
-    const userRecord = await crearUsuarioAuth(correoInstitucional, password);
+    const plainPassword = password || (Math.random().toString(36).slice(-8) + 'A1');
+    const userRecord = await crearUsuarioAuth(correoInstitucional, plainPassword);
+    const bcrypt = require('bcryptjs');
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
     const docente = new Docente({
       nombreCompleto,
       correoInstitucional,
       identificacion,
       tipoIdentificacion,
-      fechaPerf
+      fechaPerf,
+      estadoRegistro: EstadoRegistro.APROBADO,
+      passwordHash: hashedPassword
     });
     await guardarUsuarioEnFirestore(userRecord.uid, { ...docente });
     res.status(201).json({
       message: 'Docente registrado correctamente',
       uid: userRecord.uid,
-      correoInstitucional,
-      passwordTemporal: password
+      correoInstitucional
     });
   } catch (error) {
     console.error('Error al registrar docente:', error);
