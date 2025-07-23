@@ -1,5 +1,9 @@
-const { guardarTareaEnFirestore, obtenerTareasDeFirestore } = require('../services/firebaseService');
-const Tarea = require('../models/tarea');
+const {
+  guardarTareaEnFirestore,
+  obtenerTareasDeFirestore,
+  editarTareaEnFirestore,
+  eliminarTareaEnFirestore
+} = require('../services/firebaseService');
 
 // Registrar una nueva tarea
 async function registrarTarea(req, res) {
@@ -54,4 +58,29 @@ async function obtenerTareas(req, res) {
   }
 }
 
-module.exports = { registrarTarea, obtenerTareas };
+// Editar una tarea existente
+
+async function editarTarea(req, res) {
+  try {
+    const { id } = req.params;
+    const datosActualizados = req.body;
+    await editarTareaEnFirestore(id, datosActualizados);
+    res.json({ message: 'Tarea actualizada correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Eliminar una tarea
+
+async function eliminarTarea(req, res) {
+  try {
+    const { id } = req.params;
+    await eliminarTareaEnFirestore(id);
+    res.json({ message: 'Tarea eliminada correctamente' });
+  } catch (error) {
+    res.status(500).json({ error: error.message });
+  }
+}
+
+module.exports = { registrarTarea, obtenerTareas, editarTarea, eliminarTarea };

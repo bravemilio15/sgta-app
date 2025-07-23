@@ -9,23 +9,37 @@ if (!admin.apps.length) {
   });
 }
 
-const auth = admin.auth();
 const db = admin.firestore();
 
-async function crearUsuarioAuth(email, password) {
-  return await auth.createUser({
-    email,
-    password,
-    emailVerified: false,
-    disabled: false
-  });
+// Guarda una tarea en Firestore
+async function guardarTareaEnFirestore(datos) {
+  const ref = await db.collection('tareas').add(datos);
+  return ref.id;
 }
 
-async function guardarUsuarioEnFirestore(uid, datos) {
-  return await db.collection('usuarios').doc(uid).set(datos);
+// Obtiene todas las tareas
+async function obtenerTareasDeFirestore() {
+  const snapshot = await db.collection('tareas').get();
+  return snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+}
+
+// Edicion de una tarea existente
+async function editarTareaEnFirestore(id, datosActualizados) {
+  const tareaRef = db.collection('tareas').doc(id);
+  await tareaRef.update(datosActualizados);
+  return tareaRef.id;
+}
+
+// Eliminacion de una tarea
+async function eliminarTareaEnFirestore(id) {
+  const tareaRef = db.collection('tareas').doc(id);
+  await tareaRef.delete();
+  return id;
 }
 
 module.exports = {
-  crearUsuarioAuth,
-  guardarUsuarioEnFirestore
+  guardarTareaEnFirestore,
+  obtenerTareasDeFirestore,
+  editarTareaEnFirestore,
+  eliminarTareaEnFirestore
 };
