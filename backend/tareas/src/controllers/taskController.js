@@ -13,12 +13,11 @@ async function registrarTarea(req, res) {
       descripcion,
       fechaInicio,
       fechaEntrega,
-      tipoTarea,
-      tareaTardia,
-      diasEntregaTardia,
-      porcentajePenalizacion,
-      estado,
-      grupal
+      tipo,
+      permiteEntregaTardia,
+      diasPermitidosEntregaTardia,
+      porcentajePenalizacionEntregaTardia,
+      esGrupal
     } = req.body;
 
     const tarea = {
@@ -26,12 +25,11 @@ async function registrarTarea(req, res) {
       descripcion,
       fechaInicio,
       fechaEntrega,
-      tipoTarea,
-      tareaTardia,
-      diasEntregaTardia,
-      porcentajePenalizacion,
-      estado,
-      grupal
+      tipo,
+      permiteEntregaTardia,
+      diasPermitidosEntregaTardia,
+      porcentajePenalizacionEntregaTardia,
+      esGrupal
     };
 
     const id = await guardarTareaEnFirestore(tarea);
