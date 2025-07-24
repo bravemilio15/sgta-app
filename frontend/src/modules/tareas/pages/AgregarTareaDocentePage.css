@@ -1,0 +1,63 @@
+.agregar-tarea-container {
+  background: #f7f9fc;
+  min-height: 100vh;
+  padding: 2rem 3rem;
+}
+
+.agregar-tarea-form {
+  background: #fff;
+  padding: 2rem;
+  border-radius: 8px;
+  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.agregar-tarea-form label {
+  font-weight: bold;
+  margin-bottom: 0.3rem;
+}
+
+.agregar-tarea-form input,
+.agregar-tarea-form select,
+.agregar-tarea-form textarea {
+  padding: 0.7rem;
+  border-radius: 6px;
+  border: 1px solid #ddd;
+  font-size: 1rem;
+}
+
+.agregar-tarea-actions {
+  display: flex;
+  gap: 1rem;
+  margin-top: 1rem;
+}
+
+.volver-btn {
+  background: #1a3fa6;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.cancelar-btn {
+  background: #ff7f7f;
+  color: #fff;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.agregar-btn {
+  background: #7fffa2;
+  color: #222;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  cursor: pointer;
+  font-weight: bold;
+}
