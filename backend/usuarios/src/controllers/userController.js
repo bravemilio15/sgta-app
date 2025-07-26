@@ -332,6 +332,141 @@ async function registrarDocente(req, res) {
   }
 }
 
+// Controlador para solicitar recuperación de contraseña
+async function solicitarRecuperacionContrasena(req, res) {
+  try {
+    const { correoPersonal } = req.body;
+    
+    if (!correoPersonal) {
+      return res.status(400).json({ 
+        error: 'El correo personal es requerido' 
+      });
+    }
+
+    // Buscar usuario por correo personal
+    const db = admin.firestore();
+    const usuariosRef = db.collection('usuarios');
+    const queryCorreoPersonal = await usuariosRef.where('correoPersonal', '==', correoPersonal).get();
+    
+    if (queryCorreoPersonal.empty) {
+      return res.status(404).json({ 
+        error: 'No se encontró una cuenta con este correo personal' 
+      });
+    }
+
+    const usuarioDoc = queryCorreoPersonal.docs[0];
+    const usuarioData = usuarioDoc.data();
+    const uid = usuarioDoc.id;
+
+    // Generar token único para recuperación
+    const tokenRecuperacion = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const expiracion = new Date();
+    expiracion.setHours(expiracion.getHours() + 1); // Expira en 1 hora
+
+    // Guardar token en Firestore
+    await db.collection('tokensRecuperacion').doc(uid).set({
+      token: tokenRecuperacion,
+      expiracion: expiracion.toISOString(),
+      usado: false
+    });
+
+    // URL de recuperación (ajusta según tu dominio)
+    const urlRecuperacion = `http://localhost:5173/cambiar-contrasena?token=${tokenRecuperacion}&uid=${uid}`;
+
+    // Enviar correo con el link
+    await enviarCorreo(
+      correoPersonal,
+      'Recuperación de Contraseña - SGTA',
+      `Hola ${usuarioData.nombreCompleto},\n\nSe ha solicitado la recuperación de tu contraseña en el sistema SGTA.\n\nHaz clic en el siguiente enlace para cambiar tu contraseña:\n\n${urlRecuperacion}\n\nEste enlace expira en 1 hora.\n\nSi no solicitaste esta recuperación, puedes ignorar este email.\n\nSaludos,\nEquipo SGTA - Universidad Nacional de Loja`
+    );
+
+    res.status(200).json({
+      message: 'Se ha enviado un enlace de recuperación a tu correo personal.',
+      uid
+    });
+  } catch (error) {
+    console.error('Error al solicitar recuperación de contraseña:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Controlador para cambiar contraseña usando token de recuperación
+async function cambiarContrasenaConToken(req, res) {
+  try {
+    const { token, uid, nuevaContrasena } = req.body;
+    
+    if (!token || !uid || !nuevaContrasena) {
+      return res.status(400).json({ 
+        error: 'Token, UID y nueva contraseña son requeridos' 
+      });
+    }
+
+    // Validar que la contraseña tenga al menos 6 caracteres
+    if (nuevaContrasena.length < 6) {
+      return res.status(400).json({ 
+        error: 'La contraseña debe tener al menos 6 caracteres' 
+      });
+    }
+
+    const db = admin.firestore();
+    
+    // Verificar token en Firestore
+    const tokenDoc = await db.collection('tokensRecuperacion').doc(uid).get();
+    
+    if (!tokenDoc.exists) {
+      return res.status(404).json({ 
+        error: 'Token de recuperación no encontrado' 
+      });
+    }
+
+    const tokenData = tokenDoc.data();
+    
+    // Verificar que el token coincida
+    if (tokenData.token !== token) {
+      return res.status(400).json({ 
+        error: 'Token de recuperación inválido' 
+      });
+    }
+
+    // Verificar que no haya expirado
+    const expiracion = new Date(tokenData.expiracion);
+    if (new Date() > expiracion) {
+      return res.status(400).json({ 
+        error: 'Token de recuperación expirado' 
+      });
+    }
+
+    // Verificar que no haya sido usado
+    if (tokenData.usado) {
+      return res.status(400).json({ 
+        error: 'Token de recuperación ya ha sido usado' 
+      });
+    }
+
+    // Actualizar contraseña en Firebase Auth
+    await admin.auth().updateUser(uid, { password: nuevaContrasena });
+
+    // Cifrar la nueva contraseña y actualizar en Firestore
+    const hashedPassword = await bcrypt.hash(nuevaContrasena, 10);
+    await db.collection('usuarios').doc(uid).update({ 
+      passwordHash: hashedPassword,
+      passwordTemporal: null // Limpiar contraseña temporal
+    });
+
+    // Marcar token como usado
+    await db.collection('tokensRecuperacion').doc(uid).update({ 
+      usado: true 
+    });
+
+    res.status(200).json({
+      message: 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.'
+    });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 // Obtener usuario por uid
 async function obtenerUsuarioPorUid(req, res) {
   try {
@@ -430,6 +565,8 @@ module.exports = {
   aprobarUsuario, 
   registrarAdministrador, 
   registrarDocente, 
+  solicitarRecuperacionContrasena,
+  cambiarContrasenaConToken,
   obtenerUsuarioPorUid, 
   obtenerUsuariosPendientes,
   obtenerUsuariosPorTipo,

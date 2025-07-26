@@ -185,3 +185,23 @@ export async function asignarDocenteAAsignatura(asignaturaId: string, docenteUid
   return response.json();
 }
 
+// Solicitar recuperación de contraseña
+export async function solicitarRecuperacionContrasena(correoPersonal: string) {
+  const response = await fetch(`${API_BASE}/usuarios/solicitar-recuperacion`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ correoPersonal })
+  });
+  return response.json();
+}
+
+// Cambiar contraseña con token
+export async function cambiarContrasenaConToken(token: string, uid: string, nuevaContrasena: string) {
+  const response = await fetch(`${API_BASE}/usuarios/cambiar-contrasena`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, uid, nuevaContrasena })
+  });
+  return response.json();
+}
+

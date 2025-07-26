@@ -5,6 +5,8 @@ const {
   aprobarUsuario, 
   registrarAdministrador, 
   registrarDocente, 
+  solicitarRecuperacionContrasena,
+  cambiarContrasenaConToken,
   obtenerUsuarioPorUid, 
   obtenerUsuariosPendientes,
   obtenerUsuariosPorTipo,
@@ -19,6 +21,10 @@ router.post('/approve', aprobarUsuario);
 router.post('/register-admin', registrarAdministrador);
 // Ruta para registrar docente
 router.post('/register-docente', registrarDocente);
+// Ruta para solicitar recuperación de contraseña
+router.post('/solicitar-recuperacion', solicitarRecuperacionContrasena);
+// Ruta para cambiar contraseña con token
+router.post('/cambiar-contrasena', cambiarContrasenaConToken);
 // Ruta para obtener estadísticas
 router.get('/estadisticas', obtenerEstadisticas);
 // Ruta para obtener usuario por uid

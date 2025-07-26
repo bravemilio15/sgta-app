@@ -9,6 +9,8 @@ import AdminEstudiantes from '../modules/usuarios/pages/PanelAdmin/AdminEstudian
 import AdminDocentes from '../modules/usuarios/pages/PanelAdmin/AdminDocentes';
 import AdminAsignaturas from '../modules/usuarios/pages/PanelAdmin/AdminAsignaturas';
 import AdminReportes from '../modules/usuarios/pages/PanelAdmin/AdminReportes';
+import OlvidarContra from '../modules/usuarios/pages/OlvidarContrasena/olvidarContra';
+import CambiarContrasena from '../modules/usuarios/pages/OlvidarContrasena/CambiarContrasena';
 import Header from '../shared/components/Header';
 import Layout from '../shared/components/Layout/Layout';
 import '../index.css';
@@ -97,6 +99,16 @@ export default function AppRouter() {
             <Route path="/usuarios/registro/docente" element={
               <PublicRoute>
                 <RegisterPageDocente />
+              </PublicRoute>
+            } />
+            <Route path="/usuarios/olvidar-contrasena" element={
+              <PublicRoute>
+                <OlvidarContra />
+              </PublicRoute>
+            } />
+            <Route path="/cambiar-contrasena" element={
+              <PublicRoute>
+                <CambiarContrasena />
               </PublicRoute>
             } />
             
