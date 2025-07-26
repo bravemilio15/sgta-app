@@ -19,6 +19,13 @@ async function registrarUsuario(req, res) {
       password // opcional
     } = req.body;
 
+    // Validar campos requeridos
+    if (!primerNombre || !primerApellido || !identificacion || !tipoIdentificacion || !correoPersonal || !correoUsuario) {
+      return res.status(400).json({ 
+        error: 'Todos los campos son obligatorios: primerNombre, primerApellido, identificacion, tipoIdentificacion, correoPersonal, correoUsuario' 
+      });
+    }
+
     // Construir correo institucional
     const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
     // Generar nombre completo
@@ -26,8 +33,37 @@ async function registrarUsuario(req, res) {
     // Fecha de creación
     const fechaPerf = new Date().toISOString();
 
-    // Usar la contraseña proporcionada o generar una aleatoria
-    const plainPassword = password || (Math.random().toString(36).slice(-8) + 'A1');
+    // Verificar si ya existe un usuario con esa identificación
+    const db = admin.firestore();
+    const usuariosRef = db.collection('usuarios');
+    const queryIdentificacion = await usuariosRef.where('identificacion', '==', identificacion).get();
+    
+    if (!queryIdentificacion.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con esa identificación' 
+      });
+    }
+
+    // Verificar si ya existe un usuario con ese correo personal
+    const queryCorreoPersonal = await usuariosRef.where('correoPersonal', '==', correoPersonal).get();
+    
+    if (!queryCorreoPersonal.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con ese correo personal' 
+      });
+    }
+
+    // Verificar si ya existe un usuario con ese correo institucional
+    const queryCorreoInstitucional = await usuariosRef.where('correoInstitucional', '==', correoInstitucional).get();
+    
+    if (!queryCorreoInstitucional.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con ese correo institucional' 
+      });
+    }
+
+    // Para estudiantes: siempre generar contraseña temporal (no ingresan contraseña)
+    const plainPassword = Math.random().toString(36).slice(-8) + 'A1';
     // Crear usuario en Auth
     const userRecord = await crearUsuarioAuth(correoInstitucional, plainPassword);
     // Hashear la contraseña para guardar en Firestore
@@ -45,28 +81,41 @@ async function registrarUsuario(req, res) {
       passwordHash: hashedPassword,
       passwordTemporal: plainPassword,
       carrera: 'Computación', // Quemada como solicitaste
-      asignatura: '',
+      asignaturasUid: [],
       fechaRegistro: fechaPerf
     });
 
     // Guardar en Firestore
     await guardarUsuarioEnFirestore(userRecord.uid, estudiante);
 
-    // Enviar correo con la contraseña temporal
-    await enviarCorreo(
-      correoPersonal,
-      'Registro Exitoso - SGTA',
-      `Hola ${nombreCompleto},\n\nTu registro en el sistema SGTA ha sido exitoso.\n\nTus credenciales temporales son:\nCorreo: ${correoInstitucional}\nContraseña: ${plainPassword}\n\nPor favor, cambia tu contraseña al iniciar sesión.\n\nSaludos,\nEquipo SGTA`
-    );
-
+    // NO enviar correo con credenciales hasta que sea aprobado
     res.status(201).json({
-      message: 'Estudiante registrado correctamente',
+      message: '¡Registro exitoso! Tu cuenta está pendiente de aprobación por el administrador.',
       uid: userRecord.uid,
-      correoInstitucional,
-      passwordTemporal: plainPassword
+      correoInstitucional
     });
   } catch (error) {
     console.error('Error al registrar estudiante:', error);
+    
+    // Manejar errores específicos de Firebase Auth
+    if (error.code === 'auth/email-already-exists') {
+      return res.status(400).json({ 
+        error: 'El correo institucional ya está registrado en el sistema' 
+      });
+    }
+    
+    if (error.code === 'auth/invalid-email') {
+      return res.status(400).json({ 
+        error: 'El formato del correo institucional no es válido' 
+      });
+    }
+    
+    if (error.code === 'auth/weak-password') {
+      return res.status(400).json({ 
+        error: 'La contraseña generada es muy débil' 
+      });
+    }
+    
     res.status(500).json({ error: error.message });
   }
 }
@@ -127,6 +176,14 @@ async function registrarAdministrador(req, res) {
       tipoIdentificacion,
       password // opcional
     } = req.body;
+    
+    // Validar campos requeridos
+    if (!nombreCompleto || !correoPersonal || !correoUsuario || !identificacion || !tipoIdentificacion) {
+      return res.status(400).json({ 
+        error: 'Todos los campos son obligatorios: nombreCompleto, correoPersonal, correoUsuario, identificacion, tipoIdentificacion' 
+      });
+    }
+    
     const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
     const fechaPerf = new Date().toISOString();
     const plainPassword = password || (Math.random().toString(36).slice(-8) + 'A1');
@@ -176,14 +233,54 @@ async function registrarDocente(req, res) {
       correoUsuario,
       identificacion,
       tipoIdentificacion,
-      materias, // Array de materias
-      titulos, // Array de títulos
-      departamento,
-      password // opcional
+      asignaturasUid, // Array de IDs de asignaturas
+      titulos, // Array de títulos académicos
+      departamento
     } = req.body;
+    
+    // Validar campos requeridos
+    if (!nombreCompleto || !correoUsuario || !identificacion || !tipoIdentificacion) {
+      return res.status(400).json({ 
+        error: 'Todos los campos son obligatorios: nombreCompleto, correoUsuario, identificacion, tipoIdentificacion' 
+      });
+    }
+    
     const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
     const fechaPerf = new Date().toISOString();
-    const plainPassword = password || (Math.random().toString(36).slice(-8) + 'A1');
+
+    // Verificar si ya existe un usuario con esa identificación
+    const db = admin.firestore();
+    const usuariosRef = db.collection('usuarios');
+    const queryIdentificacion = await usuariosRef.where('identificacion', '==', identificacion).get();
+    
+    if (!queryIdentificacion.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con esa identificación' 
+      });
+    }
+
+    // Verificar si ya existe un usuario con ese correo personal (solo si se proporciona)
+    if (correoPersonal) {
+      const queryCorreoPersonal = await usuariosRef.where('correoPersonal', '==', correoPersonal).get();
+      
+      if (!queryCorreoPersonal.empty) {
+        return res.status(400).json({ 
+          error: 'Ya existe un usuario registrado con ese correo personal' 
+        });
+      }
+    }
+
+    // Verificar si ya existe un usuario con ese correo institucional
+    const queryCorreoInstitucional = await usuariosRef.where('correoInstitucional', '==', correoInstitucional).get();
+    
+    if (!queryCorreoInstitucional.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con ese correo institucional' 
+      });
+    }
+
+    // Para docentes: generar contraseña temporal automáticamente (misma lógica que estudiantes)
+    const plainPassword = Math.random().toString(36).slice(-8) + 'A1';
     const userRecord = await crearUsuarioAuth(correoInstitucional, plainPassword);
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
     
@@ -194,31 +291,178 @@ async function registrarDocente(req, res) {
       identificacion,
       tipoIdentificacion,
       fechaPerf,
-      estadoRegistro: EstadoRegistro.APROBADO,
+      estadoRegistro: EstadoRegistro.PENDIENTE, // Los docentes requieren aprobación del administrador
       passwordHash: hashedPassword,
       passwordTemporal: plainPassword,
-      materias: Array.isArray(materias) ? materias : materias.split(',').map(m => m.trim()),
-      titulos: Array.isArray(titulos) ? titulos : titulos.split(',').map(t => t.trim()),
-      departamento
+      asignaturasUid: Array.isArray(asignaturasUid) ? asignaturasUid : [],
+      titulos: Array.isArray(titulos) ? titulos : (titulos ? titulos.split(',').map(t => t.trim()) : [])
     });
     
     await guardarUsuarioEnFirestore(userRecord.uid, docente);
     
-    // Enviar correo con credenciales
-    await enviarCorreo(
-      correoPersonal,
-      'Cuenta de Docente Creada - SGTA',
-      `Hola ${nombreCompleto},\n\nTu cuenta de docente ha sido creada exitosamente.\n\nTus credenciales son:\nCorreo: ${correoInstitucional}\nContraseña: ${plainPassword}\n\nMaterias asignadas: ${docente.materias.join(', ')}\n\nSaludos,\nEquipo SGTA`
-    );
-    
+    // NO enviar correo con credenciales hasta que sea aprobado
     res.status(201).json({
-      message: 'Docente registrado correctamente',
+      message: '¡Registro exitoso! Tu cuenta está pendiente de aprobación por el administrador.',
       uid: userRecord.uid,
-      correoInstitucional,
-      passwordTemporal: plainPassword
+      correoInstitucional
     });
   } catch (error) {
     console.error('Error al registrar docente:', error);
+    
+    // Manejar errores específicos de Firebase Auth
+    if (error.code === 'auth/email-already-exists') {
+      return res.status(400).json({ 
+        error: 'El correo institucional ya está registrado en el sistema' 
+      });
+    }
+    
+    if (error.code === 'auth/invalid-email') {
+      return res.status(400).json({ 
+        error: 'El formato del correo institucional no es válido' 
+      });
+    }
+    
+    if (error.code === 'auth/weak-password') {
+      return res.status(400).json({ 
+        error: 'La contraseña generada es muy débil' 
+      });
+    }
+    
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Controlador para solicitar recuperación de contraseña
+async function solicitarRecuperacionContrasena(req, res) {
+  try {
+    const { correoPersonal } = req.body;
+    
+    if (!correoPersonal) {
+      return res.status(400).json({ 
+        error: 'El correo personal es requerido' 
+      });
+    }
+
+    // Buscar usuario por correo personal
+    const db = admin.firestore();
+    const usuariosRef = db.collection('usuarios');
+    const queryCorreoPersonal = await usuariosRef.where('correoPersonal', '==', correoPersonal).get();
+    
+    if (queryCorreoPersonal.empty) {
+      return res.status(404).json({ 
+        error: 'No se encontró una cuenta con este correo personal' 
+      });
+    }
+
+    const usuarioDoc = queryCorreoPersonal.docs[0];
+    const usuarioData = usuarioDoc.data();
+    const uid = usuarioDoc.id;
+
+    // Generar token único para recuperación
+    const tokenRecuperacion = Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15);
+    const expiracion = new Date();
+    expiracion.setHours(expiracion.getHours() + 1); // Expira en 1 hora
+
+    // Guardar token en Firestore
+    await db.collection('tokensRecuperacion').doc(uid).set({
+      token: tokenRecuperacion,
+      expiracion: expiracion.toISOString(),
+      usado: false
+    });
+
+    // URL de recuperación (ajusta según tu dominio)
+    const urlRecuperacion = `http://localhost:5173/cambiar-contrasena?token=${tokenRecuperacion}&uid=${uid}`;
+
+    // Enviar correo con el link
+    await enviarCorreo(
+      correoPersonal,
+      'Recuperación de Contraseña - SGTA',
+      `Hola ${usuarioData.nombreCompleto},\n\nSe ha solicitado la recuperación de tu contraseña en el sistema SGTA.\n\nHaz clic en el siguiente enlace para cambiar tu contraseña:\n\n${urlRecuperacion}\n\nEste enlace expira en 1 hora.\n\nSi no solicitaste esta recuperación, puedes ignorar este email.\n\nSaludos,\nEquipo SGTA - Universidad Nacional de Loja`
+    );
+
+    res.status(200).json({
+      message: 'Se ha enviado un enlace de recuperación a tu correo personal.',
+      uid
+    });
+  } catch (error) {
+    console.error('Error al solicitar recuperación de contraseña:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Controlador para cambiar contraseña usando token de recuperación
+async function cambiarContrasenaConToken(req, res) {
+  try {
+    const { token, uid, nuevaContrasena } = req.body;
+    
+    if (!token || !uid || !nuevaContrasena) {
+      return res.status(400).json({ 
+        error: 'Token, UID y nueva contraseña son requeridos' 
+      });
+    }
+
+    // Validar que la contraseña tenga al menos 6 caracteres
+    if (nuevaContrasena.length < 6) {
+      return res.status(400).json({ 
+        error: 'La contraseña debe tener al menos 6 caracteres' 
+      });
+    }
+
+    const db = admin.firestore();
+    
+    // Verificar token en Firestore
+    const tokenDoc = await db.collection('tokensRecuperacion').doc(uid).get();
+    
+    if (!tokenDoc.exists) {
+      return res.status(404).json({ 
+        error: 'Token de recuperación no encontrado' 
+      });
+    }
+
+    const tokenData = tokenDoc.data();
+    
+    // Verificar que el token coincida
+    if (tokenData.token !== token) {
+      return res.status(400).json({ 
+        error: 'Token de recuperación inválido' 
+      });
+    }
+
+    // Verificar que no haya expirado
+    const expiracion = new Date(tokenData.expiracion);
+    if (new Date() > expiracion) {
+      return res.status(400).json({ 
+        error: 'Token de recuperación expirado' 
+      });
+    }
+
+    // Verificar que no haya sido usado
+    if (tokenData.usado) {
+      return res.status(400).json({ 
+        error: 'Token de recuperación ya ha sido usado' 
+      });
+    }
+
+    // Actualizar contraseña en Firebase Auth
+    await admin.auth().updateUser(uid, { password: nuevaContrasena });
+
+    // Cifrar la nueva contraseña y actualizar en Firestore
+    const hashedPassword = await bcrypt.hash(nuevaContrasena, 10);
+    await db.collection('usuarios').doc(uid).update({ 
+      passwordHash: hashedPassword,
+      passwordTemporal: null // Limpiar contraseña temporal
+    });
+
+    // Marcar token como usado
+    await db.collection('tokensRecuperacion').doc(uid).update({ 
+      usado: true 
+    });
+
+    res.status(200).json({
+      message: 'Contraseña actualizada exitosamente. Ya puedes iniciar sesión con tu nueva contraseña.'
+    });
+  } catch (error) {
+    console.error('Error al cambiar contraseña:', error);
     res.status(500).json({ error: error.message });
   }
 }
@@ -244,7 +488,14 @@ async function obtenerUsuariosPendientes(req, res) {
   try {
     const db = admin.firestore();
     const snapshot = await db.collection('usuarios').where('estadoRegistro', '==', 'Pendiente').get();
-    const usuarios = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+    const usuarios = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        uid: doc.id, 
+        ...data,
+        estado: data.estadoRegistro?.toLowerCase() || 'pendiente' // Agregar campo estado para compatibilidad
+      };
+    });
     res.json(usuarios);
   } catch (error) {
     console.error('Error al obtener usuarios pendientes:', error);
@@ -263,11 +514,15 @@ async function obtenerUsuariosPorTipo(req, res) {
     }
 
     const snapshot = await db.collection('usuarios').where('tipo', '==', tipo).get();
-    const usuarios = snapshot.docs.map(doc => ({ 
-      uid: doc.id, 
-      ...doc.data(),
-      fechaRegistro: doc.data().fechaRegistro || doc.data().fechaPerf ? new Date(doc.data().fechaPerf).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
-    }));
+    const usuarios = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        uid: doc.id, 
+        ...data,
+        estado: data.estadoRegistro?.toLowerCase() || 'pendiente', // Agregar campo estado para compatibilidad
+        fechaRegistro: data.fechaRegistro || data.fechaPerf ? new Date(data.fechaPerf).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+      };
+    });
     
     res.json(usuarios);
   } catch (error) {
@@ -285,12 +540,17 @@ async function obtenerEstadisticas(req, res) {
     const snapshot = await db.collection('usuarios').get();
     const usuarios = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
     
+    // Obtener asignaturas
+    const asignaturasSnapshot = await db.collection('asignaturas').get();
+    const totalAsignaturas = asignaturasSnapshot.size;
+    
     // Calcular estadísticas
     const estadisticas = {
       totalEstudiantes: usuarios.filter(u => u.tipo === 'estudiante').length,
       totalDocentes: usuarios.filter(u => u.tipo === 'docente').length,
       estudiantesPendientes: usuarios.filter(u => u.tipo === 'estudiante' && u.estadoRegistro === 'Pendiente').length,
-      docentesActivos: usuarios.filter(u => u.tipo === 'docente' && u.estadoRegistro === 'Aprobado').length
+      docentesActivos: usuarios.filter(u => u.tipo === 'docente' && u.estadoRegistro === 'Aprobado').length,
+      totalAsignaturas: totalAsignaturas
     };
     
     res.json(estadisticas);
@@ -305,6 +565,8 @@ module.exports = {
   aprobarUsuario, 
   registrarAdministrador, 
   registrarDocente, 
+  solicitarRecuperacionContrasena,
+  cambiarContrasenaConToken,
   obtenerUsuarioPorUid, 
   obtenerUsuariosPendientes,
   obtenerUsuariosPorTipo,

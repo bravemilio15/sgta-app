@@ -5,7 +5,8 @@ import { getAuth, signOut } from 'firebase/auth';
 import { 
   FiBarChart2, 
   FiUsers, 
-  FiLogOut
+  FiLogOut,
+  FiBook
 } from 'react-icons/fi';
 
 const AdminSidebar = () => {
@@ -28,6 +29,7 @@ const AdminSidebar = () => {
     { to: '/panel-admin', label: 'Dashboard', icon: <FiBarChart2 />, exact: true },
     { to: '/panel-admin/estudiantes', label: 'Estudiantes', icon: <FiUsers /> },
     { to: '/panel-admin/docentes', label: 'Docentes', icon: <FiUsers /> },
+    { to: '/panel-admin/asignaturas', label: 'Asignaturas', icon: <FiBook /> },
     { to: '/panel-admin/reportes', label: 'Reportes', icon: <FiBarChart2 /> },
   ];
 

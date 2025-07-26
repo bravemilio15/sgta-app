@@ -226,21 +226,13 @@ const AdminEstudiantes = () => {
                   <td>{estudiante.fechaRegistro}</td>
                   <td className="acciones-cell">
                     <div className="acciones-buttons">
-                      {estudiante.estado === 'pendiente' && (
-                        <>
-                          <Button 
-                            onClick={() => handleAprobarEstudiante(estudiante.uid)}
-                            className="aprobar-btn"
-                          >
-                            ✅ Aprobar
-                          </Button>
-                          <Button 
-                            onClick={() => handleRechazarEstudiante(estudiante.uid)}
-                            className="rechazar-btn"
-                          >
-                            ❌ Rechazar
-                          </Button>
-                        </>
+                      {estudiante.estado?.toLowerCase() === 'pendiente' && (
+                        <Button 
+                          onClick={() => handleAprobarEstudiante(estudiante.uid)}
+                          className="aprobar-btn"
+                        >
+                          ✅ Aprobar
+                        </Button>
                       )}
                       <Button 
                         onClick={() => handleEditarEstudiante(estudiante)}

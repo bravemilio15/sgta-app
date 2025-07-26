@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useUser } from '../../../../context/UserContext';
 import AdminLayout from '../../../../shared/components/Layout/AdminLayout';
 import { obtenerEstadisticas } from '../../../../api';
-import { FiUsers, FiUser, FiClock, FiFileText } from 'react-icons/fi';
+import { FiUsers, FiUser, FiClock, FiFileText, FiBook } from 'react-icons/fi';
 import './AdminDashboard.css';
 
 interface Estadisticas {
@@ -10,6 +10,7 @@ interface Estadisticas {
   totalDocentes: number;
   estudiantesPendientes: number;
   docentesActivos: number;
+  totalAsignaturas?: number;
 }
 
 const AdminDashboard: React.FC = () => {
@@ -18,7 +19,8 @@ const AdminDashboard: React.FC = () => {
     totalEstudiantes: 0,
     totalDocentes: 0,
     estudiantesPendientes: 0,
-    docentesActivos: 0
+    docentesActivos: 0,
+    totalAsignaturas: 0
   });
   const [cargando, setCargando] = useState(true);
 
@@ -38,7 +40,8 @@ const AdminDashboard: React.FC = () => {
         totalEstudiantes: 0,
         totalDocentes: 0,
         estudiantesPendientes: 0,
-        docentesActivos: 0
+        docentesActivos: 0,
+        totalAsignaturas: 0
       });
     } finally {
       setCargando(false);
@@ -106,6 +109,16 @@ const AdminDashboard: React.FC = () => {
               <p>Docentes Activos</p>
             </div>
           </div>
+
+          <div className="stat-card">
+            <div className="stat-icon">
+              <FiBook />
+            </div>
+            <div className="stat-content">
+              <h3>{estadisticas.totalAsignaturas || 0}</h3>
+              <p>Total Asignaturas</p>
+            </div>
+          </div>
         </div>
 
         <div className="admin-dashboard-sections">
@@ -134,6 +147,14 @@ const AdminDashboard: React.FC = () => {
               >
                 <FiFileText />
                 Ver Reportes
+              </button>
+
+              <button 
+                className="quick-action-btn"
+                onClick={() => window.location.href = '/panel-admin/asignaturas'}
+              >
+                <FiBook />
+                Gestionar Asignaturas
               </button>
             </div>
           </div>

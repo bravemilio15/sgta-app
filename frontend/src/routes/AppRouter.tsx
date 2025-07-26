@@ -7,7 +7,10 @@ import PanelAdminPage from '../modules/usuarios/pages/PanelAdmin/PanelAdminPage'
 import AdminDashboard from '../modules/usuarios/pages/PanelAdmin/AdminDashboard';
 import AdminEstudiantes from '../modules/usuarios/pages/PanelAdmin/AdminEstudiantes';
 import AdminDocentes from '../modules/usuarios/pages/PanelAdmin/AdminDocentes';
+import AdminAsignaturas from '../modules/usuarios/pages/PanelAdmin/AdminAsignaturas';
 import AdminReportes from '../modules/usuarios/pages/PanelAdmin/AdminReportes';
+import OlvidarContra from '../modules/usuarios/pages/OlvidarContrasena/olvidarContra';
+import CambiarContrasena from '../modules/usuarios/pages/OlvidarContrasena/CambiarContrasena';
 import Header from '../shared/components/Header';
 import Layout from '../shared/components/Layout/Layout';
 import '../index.css';
@@ -98,6 +101,16 @@ export default function AppRouter() {
                 <RegisterPageDocente />
               </PublicRoute>
             } />
+            <Route path="/usuarios/olvidar-contrasena" element={
+              <PublicRoute>
+                <OlvidarContra />
+              </PublicRoute>
+            } />
+            <Route path="/cambiar-contrasena" element={
+              <PublicRoute>
+                <CambiarContrasena />
+              </PublicRoute>
+            } />
             
             {/* Rutas protegidas */}
             <Route path="/tareas" element={
@@ -130,6 +143,11 @@ export default function AppRouter() {
             <Route path="/panel-admin/docentes" element={
               <ProtectedRoute allowedTypes={['administrador']}>
                 <AdminDocentes />
+              </ProtectedRoute>
+            } />
+            <Route path="/panel-admin/asignaturas" element={
+              <ProtectedRoute allowedTypes={['administrador']}>
+                <AdminAsignaturas />
               </ProtectedRoute>
             } />
             <Route path="/panel-admin/reportes" element={

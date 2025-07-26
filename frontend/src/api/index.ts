@@ -1,4 +1,5 @@
 const API_BASE = 'http://localhost:3004/api';
+const ASIGNATURAS_API = 'http://localhost:3005/api';
 const NOTIFICACIONES_API = 'http://localhost:3001/api';
 
 // Usuarios
@@ -112,6 +113,94 @@ export async function registrarDocente(datos: any) {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+// Asignaturas
+export async function crearAsignatura(datos: any) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/crear`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function obtenerAsignaturas() {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/todas`);
+  return response.json();
+}
+
+export async function obtenerAsignaturaPorId(id: string) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/${id}`);
+  return response.json();
+}
+
+export async function editarAsignatura(id: string, datos: any) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function eliminarAsignatura(id: string) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/${id}`, {
+    method: 'DELETE'
+  });
+  return response.json();
+}
+
+export async function obtenerAsignaturasPorDocente(docenteUid: string) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/docente/${docenteUid}`);
+  return response.json();
+}
+
+export async function agregarEstudianteAAsignatura(asignaturaId: string, estudianteUid: string) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/agregar-estudiante`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ asignaturaId, estudianteUid })
+  });
+  return response.json();
+}
+
+export async function removerEstudianteDeAsignatura(asignaturaId: string, estudianteUid: string) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/remover-estudiante`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ asignaturaId, estudianteUid })
+  });
+  return response.json();
+}
+
+export async function asignarDocenteAAsignatura(asignaturaId: string, docenteUid: string) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/asignar-docente`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ asignaturaId, docenteUid })
+  });
+  return response.json();
+}
+
+// Solicitar recuperación de contraseña
+export async function solicitarRecuperacionContrasena(correoPersonal: string) {
+  const response = await fetch(`${API_BASE}/usuarios/solicitar-recuperacion`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ correoPersonal })
+  });
+  return response.json();
+}
+
+// Cambiar contraseña con token
+export async function cambiarContrasenaConToken(token: string, uid: string, nuevaContrasena: string) {
+  const response = await fetch(`${API_BASE}/usuarios/cambiar-contrasena`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ token, uid, nuevaContrasena })
   });
   return response.json();
 }

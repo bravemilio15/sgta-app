@@ -42,6 +42,10 @@ const LoginPage = () => {
     }
   };
 
+  const handleOlvideContrasena = () => {
+    navigate('/usuarios/olvidar-contrasena');
+  };
+
   return (
     <div className="login-bg">
       <main className="login-main">
@@ -63,7 +67,13 @@ const LoginPage = () => {
             <Button type="submit">ACCEDER</Button>
 
             <div className="login-actions" style={{ display: 'flex', justifyContent: 'center', marginTop: '0.7rem' }}>
-              <Button type="button" style={{ background: '#e0e0e0', color: '#222' }}>Olvidé mi contraseña</Button>
+              <Button 
+                type="button" 
+                style={{ background: '#e0e0e0', color: '#222' }}
+                onClick={handleOlvideContrasena}
+              >
+                Olvidé mi contraseña
+              </Button>
             </div>
           </form>
           <div className="login-register" style={{ textAlign: 'center', width: '100%' }}>

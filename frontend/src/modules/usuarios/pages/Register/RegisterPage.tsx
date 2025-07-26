@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../../../../shared/components/Button';
 import './RegisterPage.css';
 import { useNavigate } from 'react-router-dom';
-import { registrarUsuario } from '../../../../api';
+import { registrarUsuario, obtenerAsignaturas } from '../../../../api';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -13,15 +13,55 @@ const RegisterPage = () => {
   const [segundoApellido, setSegundoApellido] = useState('');
   const [identificacion, setIdentificacion] = useState('');
   const [tipoIdentificacion, setTipoIdentificacion] = useState('cedula');
-  const [asignatura, setAsignatura] = useState('procesos');
+  const [asignatura, setAsignatura] = useState('');
+  const [correoPersonal, setCorreoPersonal] = useState('');
   const [emailUser, setEmailUser] = useState('');
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [asignaturas, setAsignaturas] = useState<Array<{id: string, codigo: string, nombre: string}>>([]);
+  const [cargandoAsignaturas, setCargandoAsignaturas] = useState(true);
+
+  useEffect(() => {
+    cargarAsignaturas();
+  }, []);
+
+  const cargarAsignaturas = async () => {
+    try {
+      setCargandoAsignaturas(true);
+      const asignaturasData = await obtenerAsignaturas();
+      setAsignaturas(asignaturasData);
+      if (asignaturasData.length > 0) {
+        setAsignatura(asignaturasData[0].id);
+      }
+    } catch (error) {
+      console.error('Error al cargar asignaturas:', error);
+    } finally {
+      setCargandoAsignaturas(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setMensaje('');
+    
+    // Validar campos requeridos
+    if (!emailUser) {
+      setMensaje('Error: Debes completar el correo institucional');
+      setLoading(false);
+      return;
+    }
+    
+    // Validar formato de correo personal si se proporciona
+    if (correoPersonal) {
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(correoPersonal)) {
+        setMensaje('Error: El correo personal no tiene un formato válido');
+        setLoading(false);
+        return;
+      }
+    }
+    
     try {
       const datos = {
         primerNombre,
@@ -31,11 +71,12 @@ const RegisterPage = () => {
         identificacion,
         tipoIdentificacion,
         asignatura,
+        correoPersonal,
         correoUsuario: emailUser
       };
       const res = await registrarUsuario(datos);
       if (res && res.message) {
-        setMensaje('Hola, ¡Registro exitoso! Espera la aprobación de tu cuenta.');
+        setMensaje('¡Registro exitoso! Tu cuenta está pendiente de aprobación por el administrador.');
         // Limpiar campos
         setPrimerNombre('');
         setSegundoNombre('');
@@ -43,7 +84,8 @@ const RegisterPage = () => {
         setSegundoApellido('');
         setIdentificacion('');
         setTipoIdentificacion('cedula');
-        setAsignatura('procesos');
+        setAsignatura(asignaturas.length > 0 ? asignaturas[0].id : '');
+        setCorreoPersonal('');
         setEmailUser('');
         // Opcional: limpiar otros estados si agregas más
       } else {
@@ -87,10 +129,46 @@ const RegisterPage = () => {
               </select>
             </div>
             <label htmlFor="subject" style={{ width: '100%' }}>Asignatura:</label>
-            <select id="subject" className="register-input" style={{ width: '100%' }} value={asignatura} onChange={e => setAsignatura(e.target.value)}>
-              <option value="procesos">Procesos de Software</option>
-              <option value="otra">Otra</option>
+            <select 
+              id="subject" 
+              className="register-input" 
+              style={{ width: '100%' }} 
+              value={asignatura} 
+              onChange={e => setAsignatura(e.target.value)}
+              disabled={cargandoAsignaturas}
+            >
+              {cargandoAsignaturas ? (
+                <option>Cargando asignaturas...</option>
+              ) : asignaturas.length === 0 ? (
+                <option value="">No hay asignaturas disponibles</option>
+              ) : (
+                <>
+                  <option value="">Seleccionar asignatura</option>
+                  {asignaturas.map((asig) => (
+                    <option key={asig.id} value={asig.id}>
+                      {asig.codigo} - {asig.nombre}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
+            
+            <label htmlFor="correoPersonal" style={{ width: '100%', marginTop: '0.7rem' }}>
+              Correo personal:
+              <span style={{ fontSize: '0.8rem', color: '#666', fontWeight: 'normal', marginLeft: '0.5rem' }}>
+                (Opcional: Solo para envío de credenciales cuando sea aprobado)
+              </span>
+            </label>
+            <input
+              id="correoPersonal"
+              type="email"
+              className="register-input"
+              style={{ width: '100%' }}
+              placeholder="ejemplo@gmail.com (opcional)"
+              value={correoPersonal}
+              onChange={e => setCorreoPersonal(e.target.value)}
+            />
+            
             <label htmlFor="emailUser" style={{ width: '100%', marginTop: '0.7rem' }}>Correo institucional:</label>
             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
               <input
@@ -101,8 +179,12 @@ const RegisterPage = () => {
                 placeholder="usuario"
                 value={emailUser}
                 onChange={e => setEmailUser(e.target.value)}
+                required
               />
               <span style={{ flex: 1, color: '#222', fontWeight: 'bold', fontSize: '1rem' }}>@uni.edu.ec</span>
+            </div>
+            <div style={{ fontSize: '0.75rem', color: '#666', marginTop: '0.3rem', fontStyle: 'italic' }}>
+              📧 Este será tu usuario para acceder al sistema
             </div>
             {mensaje && <div style={{ color: mensaje.startsWith('¡Registro') ? 'green' : 'red', marginTop: '1rem', textAlign: 'center' }}>{mensaje}</div>}
             <Button type="submit" style={{ background: '#1a3fa6', color: '#fff', marginTop: '1rem', width: '100%' }} disabled={loading}>{loading ? 'Registrando...' : 'Registrarse'}</Button>
