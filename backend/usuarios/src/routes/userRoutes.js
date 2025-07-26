@@ -1,6 +1,15 @@
 const express = require('express');
 const router = express.Router();
-const { registrarUsuario, aprobarUsuario, registrarAdministrador, registrarDocente, obtenerUsuarioPorUid, obtenerUsuariosPendientes } = require('../controllers/userController');
+const { 
+  registrarUsuario, 
+  aprobarUsuario, 
+  registrarAdministrador, 
+  registrarDocente, 
+  obtenerUsuarioPorUid, 
+  obtenerUsuariosPendientes,
+  obtenerUsuariosPorTipo,
+  obtenerEstadisticas
+} = require('../controllers/userController');
 
 // Ruta para registrar usuario estudiante
 router.post('/register', registrarUsuario);
@@ -10,15 +19,20 @@ router.post('/approve', aprobarUsuario);
 router.post('/register-admin', registrarAdministrador);
 // Ruta para registrar docente
 router.post('/register-docente', registrarDocente);
+// Ruta para obtener estadísticas
+router.get('/estadisticas', obtenerEstadisticas);
 // Ruta para obtener usuario por uid
 router.get('/:uid', obtenerUsuarioPorUid);
-// Ruta para obtener usuarios pendientes
+// Ruta para obtener usuarios (con filtros)
 router.get('/', (req, res) => {
   if (req.query.estado === 'Pendiente') {
     return obtenerUsuariosPendientes(req, res);
   }
-  // Si no se proporciona el parámetro de estado, retornar error
-  res.status(400).json({ error: 'Parámetro de estado requerido' });
+  if (req.query.tipo) {
+    return obtenerUsuariosPorTipo(req, res);
+  }
+  // Si no se proporciona ningún parámetro, retornar error
+  res.status(400).json({ error: 'Parámetro de estado o tipo requerido' });
 });
 
 module.exports = router;

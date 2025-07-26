@@ -30,6 +30,24 @@ export async function obtenerUsuariosPendientes() {
   return response.json();
 }
 
+// Obtener todos los estudiantes
+export async function obtenerEstudiantes() {
+  const response = await fetch(`${API_BASE}/usuarios?tipo=estudiante`);
+  return response.json();
+}
+
+// Obtener todos los docentes
+export async function obtenerDocentes() {
+  const response = await fetch(`${API_BASE}/usuarios?tipo=docente`);
+  return response.json();
+}
+
+// Obtener estadísticas generales
+export async function obtenerEstadisticas() {
+  const response = await fetch(`${API_BASE}/usuarios/estadisticas`);
+  return response.json();
+}
+
 // Notificaciones
 export async function obtenerNotificaciones(uid: string) {
   const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}`);
