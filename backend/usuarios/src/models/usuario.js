@@ -45,7 +45,7 @@ class Estudiante extends Usuario {
     passwordHash = null,
     passwordTemporal = null,
     carrera = 'Computación', // Quemada en Computación
-    asignatura = '',
+    asignaturasUid = [], // Array de IDs de asignaturas en las que está matriculado
     fechaRegistro = new Date().toISOString()
   }) {
     super({
@@ -63,7 +63,7 @@ class Estudiante extends Usuario {
     
     // Atributos específicos del estudiante
     this.carrera = carrera;
-    this.asignatura = asignatura;
+    this.asignaturasUid = Array.isArray(asignaturasUid) ? asignaturasUid : [];
     this.fechaRegistro = fechaRegistro;
   }
 }
@@ -80,7 +80,7 @@ class Docente extends Usuario {
     estadoRegistro = EstadoRegistro.APROBADO, // Los docentes vienen aprobados por defecto
     passwordHash = null,
     passwordTemporal = null,
-    materias = [], // Array de materias que imparte
+    asignaturasUid = [], // Array de IDs de asignaturas que imparte
     titulos = [], // Array de títulos académicos
     departamento = ''
   }) {
@@ -98,7 +98,7 @@ class Docente extends Usuario {
     });
     
     // Atributos específicos del docente
-    this.materias = Array.isArray(materias) ? materias : [materias].filter(Boolean);
+    this.asignaturasUid = Array.isArray(asignaturasUid) ? asignaturasUid : [];
     this.titulos = Array.isArray(titulos) ? titulos : [titulos].filter(Boolean);
     this.departamento = departamento;
   }

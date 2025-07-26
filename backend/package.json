@@ -12,7 +12,8 @@
     "dev:usuarios": "nodemon usuarios/src/index.js",
     "dev:notificaciones": "nodemon notificaciones/src/index.js",
     "dev:tareas": "nodemon tareas/src/index.js",
-    "dev:reportes": "nodemon reportes/src/index.js"
+    "dev:reportes": "nodemon reportes/src/index.js",
+    "dev:asignaturas": "nodemon asignaturas/src/index.js"
   },
   "devDependencies": {
     "nodemon": "^3.1.10"

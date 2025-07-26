@@ -45,7 +45,7 @@ async function registrarUsuario(req, res) {
       passwordHash: hashedPassword,
       passwordTemporal: plainPassword,
       carrera: 'Computación', // Quemada como solicitaste
-      asignatura: '',
+      asignaturasUid: [],
       fechaRegistro: fechaPerf
     });
 
@@ -176,7 +176,7 @@ async function registrarDocente(req, res) {
       correoUsuario,
       identificacion,
       tipoIdentificacion,
-      materias, // Array de materias
+      asignaturasUid, // Array de IDs de asignaturas
       titulos, // Array de títulos
       departamento,
       password // opcional
@@ -197,7 +197,7 @@ async function registrarDocente(req, res) {
       estadoRegistro: EstadoRegistro.APROBADO,
       passwordHash: hashedPassword,
       passwordTemporal: plainPassword,
-      materias: Array.isArray(materias) ? materias : materias.split(',').map(m => m.trim()),
+      asignaturasUid: Array.isArray(asignaturasUid) ? asignaturasUid : [],
       titulos: Array.isArray(titulos) ? titulos : titulos.split(',').map(t => t.trim()),
       departamento
     });
@@ -208,7 +208,7 @@ async function registrarDocente(req, res) {
     await enviarCorreo(
       correoPersonal,
       'Cuenta de Docente Creada - SGTA',
-      `Hola ${nombreCompleto},\n\nTu cuenta de docente ha sido creada exitosamente.\n\nTus credenciales son:\nCorreo: ${correoInstitucional}\nContraseña: ${plainPassword}\n\nMaterias asignadas: ${docente.materias.join(', ')}\n\nSaludos,\nEquipo SGTA`
+      `Hola ${nombreCompleto},\n\nTu cuenta de docente ha sido creada exitosamente.\n\nTus credenciales son:\nCorreo: ${correoInstitucional}\nContraseña: ${plainPassword}\n\nAsignaturas asignadas: ${docente.asignaturasUid.length} asignaturas\n\nSaludos,\nEquipo SGTA`
     );
     
     res.status(201).json({
@@ -285,12 +285,17 @@ async function obtenerEstadisticas(req, res) {
     const snapshot = await db.collection('usuarios').get();
     const usuarios = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
     
+    // Obtener asignaturas
+    const asignaturasSnapshot = await db.collection('asignaturas').get();
+    const totalAsignaturas = asignaturasSnapshot.size;
+    
     // Calcular estadísticas
     const estadisticas = {
       totalEstudiantes: usuarios.filter(u => u.tipo === 'estudiante').length,
       totalDocentes: usuarios.filter(u => u.tipo === 'docente').length,
       estudiantesPendientes: usuarios.filter(u => u.tipo === 'estudiante' && u.estadoRegistro === 'Pendiente').length,
-      docentesActivos: usuarios.filter(u => u.tipo === 'docente' && u.estadoRegistro === 'Aprobado').length
+      docentesActivos: usuarios.filter(u => u.tipo === 'docente' && u.estadoRegistro === 'Aprobado').length,
+      totalAsignaturas: totalAsignaturas
     };
     
     res.json(estadisticas);

@@ -7,6 +7,7 @@ import PanelAdminPage from '../modules/usuarios/pages/PanelAdmin/PanelAdminPage'
 import AdminDashboard from '../modules/usuarios/pages/PanelAdmin/AdminDashboard';
 import AdminEstudiantes from '../modules/usuarios/pages/PanelAdmin/AdminEstudiantes';
 import AdminDocentes from '../modules/usuarios/pages/PanelAdmin/AdminDocentes';
+import AdminAsignaturas from '../modules/usuarios/pages/PanelAdmin/AdminAsignaturas';
 import AdminReportes from '../modules/usuarios/pages/PanelAdmin/AdminReportes';
 import Header from '../shared/components/Header';
 import Layout from '../shared/components/Layout/Layout';
@@ -130,6 +131,11 @@ export default function AppRouter() {
             <Route path="/panel-admin/docentes" element={
               <ProtectedRoute allowedTypes={['administrador']}>
                 <AdminDocentes />
+              </ProtectedRoute>
+            } />
+            <Route path="/panel-admin/asignaturas" element={
+              <ProtectedRoute allowedTypes={['administrador']}>
+                <AdminAsignaturas />
               </ProtectedRoute>
             } />
             <Route path="/panel-admin/reportes" element={

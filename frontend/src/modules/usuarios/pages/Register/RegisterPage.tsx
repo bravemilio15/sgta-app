@@ -1,8 +1,8 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import Button from '../../../../shared/components/Button';
 import './RegisterPage.css';
 import { useNavigate } from 'react-router-dom';
-import { registrarUsuario } from '../../../../api';
+import { registrarUsuario, obtenerAsignaturas } from '../../../../api';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -13,10 +13,31 @@ const RegisterPage = () => {
   const [segundoApellido, setSegundoApellido] = useState('');
   const [identificacion, setIdentificacion] = useState('');
   const [tipoIdentificacion, setTipoIdentificacion] = useState('cedula');
-  const [asignatura, setAsignatura] = useState('procesos');
+  const [asignatura, setAsignatura] = useState('');
   const [emailUser, setEmailUser] = useState('');
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState('');
+  const [asignaturas, setAsignaturas] = useState<Array<{id: string, codigo: string, nombre: string}>>([]);
+  const [cargandoAsignaturas, setCargandoAsignaturas] = useState(true);
+
+  useEffect(() => {
+    cargarAsignaturas();
+  }, []);
+
+  const cargarAsignaturas = async () => {
+    try {
+      setCargandoAsignaturas(true);
+      const asignaturasData = await obtenerAsignaturas();
+      setAsignaturas(asignaturasData);
+      if (asignaturasData.length > 0) {
+        setAsignatura(asignaturasData[0].id);
+      }
+    } catch (error) {
+      console.error('Error al cargar asignaturas:', error);
+    } finally {
+      setCargandoAsignaturas(false);
+    }
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -43,7 +64,7 @@ const RegisterPage = () => {
         setSegundoApellido('');
         setIdentificacion('');
         setTipoIdentificacion('cedula');
-        setAsignatura('procesos');
+        setAsignatura(asignaturas.length > 0 ? asignaturas[0].id : '');
         setEmailUser('');
         // Opcional: limpiar otros estados si agregas más
       } else {
@@ -87,9 +108,28 @@ const RegisterPage = () => {
               </select>
             </div>
             <label htmlFor="subject" style={{ width: '100%' }}>Asignatura:</label>
-            <select id="subject" className="register-input" style={{ width: '100%' }} value={asignatura} onChange={e => setAsignatura(e.target.value)}>
-              <option value="procesos">Procesos de Software</option>
-              <option value="otra">Otra</option>
+            <select 
+              id="subject" 
+              className="register-input" 
+              style={{ width: '100%' }} 
+              value={asignatura} 
+              onChange={e => setAsignatura(e.target.value)}
+              disabled={cargandoAsignaturas}
+            >
+              {cargandoAsignaturas ? (
+                <option>Cargando asignaturas...</option>
+              ) : asignaturas.length === 0 ? (
+                <option value="">No hay asignaturas disponibles</option>
+              ) : (
+                <>
+                  <option value="">Seleccionar asignatura</option>
+                  {asignaturas.map((asig) => (
+                    <option key={asig.id} value={asig.id}>
+                      {asig.codigo} - {asig.nombre}
+                    </option>
+                  ))}
+                </>
+              )}
             </select>
             <label htmlFor="emailUser" style={{ width: '100%', marginTop: '0.7rem' }}>Correo institucional:</label>
             <div style={{ display: 'flex', alignItems: 'center', width: '100%' }}>
