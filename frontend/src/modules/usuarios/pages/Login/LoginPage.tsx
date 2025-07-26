@@ -30,6 +30,12 @@ const LoginPage = () => {
         navigate('/tareas/menu/inicio-estudiante');
         return;
       }
+      if (datos && datos.tipo === 'docente') {
+        navigate('/tareas/menu/inicio-docente');
+        return;
+      }
+      // Si no coincide ningún tipo, mostrar error
+      setMensaje('Error: Tipo de usuario no válido.');
     } catch (error: any) {
       console.log('Error en login:', error);
       setMensaje('Error: ' + (error.message || 'No se pudo iniciar sesión.'));
