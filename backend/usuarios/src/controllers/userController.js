@@ -19,6 +19,13 @@ async function registrarUsuario(req, res) {
       password // opcional
     } = req.body;
 
+    // Validar campos requeridos
+    if (!primerNombre || !primerApellido || !identificacion || !tipoIdentificacion || !correoPersonal || !correoUsuario) {
+      return res.status(400).json({ 
+        error: 'Todos los campos son obligatorios: primerNombre, primerApellido, identificacion, tipoIdentificacion, correoPersonal, correoUsuario' 
+      });
+    }
+
     // Construir correo institucional
     const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
     // Generar nombre completo
@@ -26,8 +33,37 @@ async function registrarUsuario(req, res) {
     // Fecha de creación
     const fechaPerf = new Date().toISOString();
 
-    // Usar la contraseña proporcionada o generar una aleatoria
-    const plainPassword = password || (Math.random().toString(36).slice(-8) + 'A1');
+    // Verificar si ya existe un usuario con esa identificación
+    const db = admin.firestore();
+    const usuariosRef = db.collection('usuarios');
+    const queryIdentificacion = await usuariosRef.where('identificacion', '==', identificacion).get();
+    
+    if (!queryIdentificacion.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con esa identificación' 
+      });
+    }
+
+    // Verificar si ya existe un usuario con ese correo personal
+    const queryCorreoPersonal = await usuariosRef.where('correoPersonal', '==', correoPersonal).get();
+    
+    if (!queryCorreoPersonal.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con ese correo personal' 
+      });
+    }
+
+    // Verificar si ya existe un usuario con ese correo institucional
+    const queryCorreoInstitucional = await usuariosRef.where('correoInstitucional', '==', correoInstitucional).get();
+    
+    if (!queryCorreoInstitucional.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con ese correo institucional' 
+      });
+    }
+
+    // Para estudiantes: siempre generar contraseña temporal (no ingresan contraseña)
+    const plainPassword = Math.random().toString(36).slice(-8) + 'A1';
     // Crear usuario en Auth
     const userRecord = await crearUsuarioAuth(correoInstitucional, plainPassword);
     // Hashear la contraseña para guardar en Firestore
@@ -52,21 +88,34 @@ async function registrarUsuario(req, res) {
     // Guardar en Firestore
     await guardarUsuarioEnFirestore(userRecord.uid, estudiante);
 
-    // Enviar correo con la contraseña temporal
-    await enviarCorreo(
-      correoPersonal,
-      'Registro Exitoso - SGTA',
-      `Hola ${nombreCompleto},\n\nTu registro en el sistema SGTA ha sido exitoso.\n\nTus credenciales temporales son:\nCorreo: ${correoInstitucional}\nContraseña: ${plainPassword}\n\nPor favor, cambia tu contraseña al iniciar sesión.\n\nSaludos,\nEquipo SGTA`
-    );
-
+    // NO enviar correo con credenciales hasta que sea aprobado
     res.status(201).json({
-      message: 'Estudiante registrado correctamente',
+      message: '¡Registro exitoso! Tu cuenta está pendiente de aprobación por el administrador.',
       uid: userRecord.uid,
-      correoInstitucional,
-      passwordTemporal: plainPassword
+      correoInstitucional
     });
   } catch (error) {
     console.error('Error al registrar estudiante:', error);
+    
+    // Manejar errores específicos de Firebase Auth
+    if (error.code === 'auth/email-already-exists') {
+      return res.status(400).json({ 
+        error: 'El correo institucional ya está registrado en el sistema' 
+      });
+    }
+    
+    if (error.code === 'auth/invalid-email') {
+      return res.status(400).json({ 
+        error: 'El formato del correo institucional no es válido' 
+      });
+    }
+    
+    if (error.code === 'auth/weak-password') {
+      return res.status(400).json({ 
+        error: 'La contraseña generada es muy débil' 
+      });
+    }
+    
     res.status(500).json({ error: error.message });
   }
 }
@@ -127,6 +176,14 @@ async function registrarAdministrador(req, res) {
       tipoIdentificacion,
       password // opcional
     } = req.body;
+    
+    // Validar campos requeridos
+    if (!nombreCompleto || !correoPersonal || !correoUsuario || !identificacion || !tipoIdentificacion) {
+      return res.status(400).json({ 
+        error: 'Todos los campos son obligatorios: nombreCompleto, correoPersonal, correoUsuario, identificacion, tipoIdentificacion' 
+      });
+    }
+    
     const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
     const fechaPerf = new Date().toISOString();
     const plainPassword = password || (Math.random().toString(36).slice(-8) + 'A1');
@@ -177,13 +234,53 @@ async function registrarDocente(req, res) {
       identificacion,
       tipoIdentificacion,
       asignaturasUid, // Array de IDs de asignaturas
-      titulos, // Array de títulos
-      departamento,
-      password // opcional
+      titulos, // Array de títulos académicos
+      departamento
     } = req.body;
+    
+    // Validar campos requeridos
+    if (!nombreCompleto || !correoUsuario || !identificacion || !tipoIdentificacion) {
+      return res.status(400).json({ 
+        error: 'Todos los campos son obligatorios: nombreCompleto, correoUsuario, identificacion, tipoIdentificacion' 
+      });
+    }
+    
     const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
     const fechaPerf = new Date().toISOString();
-    const plainPassword = password || (Math.random().toString(36).slice(-8) + 'A1');
+
+    // Verificar si ya existe un usuario con esa identificación
+    const db = admin.firestore();
+    const usuariosRef = db.collection('usuarios');
+    const queryIdentificacion = await usuariosRef.where('identificacion', '==', identificacion).get();
+    
+    if (!queryIdentificacion.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con esa identificación' 
+      });
+    }
+
+    // Verificar si ya existe un usuario con ese correo personal (solo si se proporciona)
+    if (correoPersonal) {
+      const queryCorreoPersonal = await usuariosRef.where('correoPersonal', '==', correoPersonal).get();
+      
+      if (!queryCorreoPersonal.empty) {
+        return res.status(400).json({ 
+          error: 'Ya existe un usuario registrado con ese correo personal' 
+        });
+      }
+    }
+
+    // Verificar si ya existe un usuario con ese correo institucional
+    const queryCorreoInstitucional = await usuariosRef.where('correoInstitucional', '==', correoInstitucional).get();
+    
+    if (!queryCorreoInstitucional.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con ese correo institucional' 
+      });
+    }
+
+    // Para docentes: generar contraseña temporal automáticamente (misma lógica que estudiantes)
+    const plainPassword = Math.random().toString(36).slice(-8) + 'A1';
     const userRecord = await crearUsuarioAuth(correoInstitucional, plainPassword);
     const hashedPassword = await bcrypt.hash(plainPassword, 10);
     
@@ -194,31 +291,43 @@ async function registrarDocente(req, res) {
       identificacion,
       tipoIdentificacion,
       fechaPerf,
-      estadoRegistro: EstadoRegistro.APROBADO,
+      estadoRegistro: EstadoRegistro.PENDIENTE, // Los docentes requieren aprobación del administrador
       passwordHash: hashedPassword,
       passwordTemporal: plainPassword,
       asignaturasUid: Array.isArray(asignaturasUid) ? asignaturasUid : [],
-      titulos: Array.isArray(titulos) ? titulos : titulos.split(',').map(t => t.trim()),
-      departamento
+      titulos: Array.isArray(titulos) ? titulos : (titulos ? titulos.split(',').map(t => t.trim()) : [])
     });
     
     await guardarUsuarioEnFirestore(userRecord.uid, docente);
     
-    // Enviar correo con credenciales
-    await enviarCorreo(
-      correoPersonal,
-      'Cuenta de Docente Creada - SGTA',
-      `Hola ${nombreCompleto},\n\nTu cuenta de docente ha sido creada exitosamente.\n\nTus credenciales son:\nCorreo: ${correoInstitucional}\nContraseña: ${plainPassword}\n\nAsignaturas asignadas: ${docente.asignaturasUid.length} asignaturas\n\nSaludos,\nEquipo SGTA`
-    );
-    
+    // NO enviar correo con credenciales hasta que sea aprobado
     res.status(201).json({
-      message: 'Docente registrado correctamente',
+      message: '¡Registro exitoso! Tu cuenta está pendiente de aprobación por el administrador.',
       uid: userRecord.uid,
-      correoInstitucional,
-      passwordTemporal: plainPassword
+      correoInstitucional
     });
   } catch (error) {
     console.error('Error al registrar docente:', error);
+    
+    // Manejar errores específicos de Firebase Auth
+    if (error.code === 'auth/email-already-exists') {
+      return res.status(400).json({ 
+        error: 'El correo institucional ya está registrado en el sistema' 
+      });
+    }
+    
+    if (error.code === 'auth/invalid-email') {
+      return res.status(400).json({ 
+        error: 'El formato del correo institucional no es válido' 
+      });
+    }
+    
+    if (error.code === 'auth/weak-password') {
+      return res.status(400).json({ 
+        error: 'La contraseña generada es muy débil' 
+      });
+    }
+    
     res.status(500).json({ error: error.message });
   }
 }
@@ -244,7 +353,14 @@ async function obtenerUsuariosPendientes(req, res) {
   try {
     const db = admin.firestore();
     const snapshot = await db.collection('usuarios').where('estadoRegistro', '==', 'Pendiente').get();
-    const usuarios = snapshot.docs.map(doc => ({ uid: doc.id, ...doc.data() }));
+    const usuarios = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        uid: doc.id, 
+        ...data,
+        estado: data.estadoRegistro?.toLowerCase() || 'pendiente' // Agregar campo estado para compatibilidad
+      };
+    });
     res.json(usuarios);
   } catch (error) {
     console.error('Error al obtener usuarios pendientes:', error);
@@ -263,11 +379,15 @@ async function obtenerUsuariosPorTipo(req, res) {
     }
 
     const snapshot = await db.collection('usuarios').where('tipo', '==', tipo).get();
-    const usuarios = snapshot.docs.map(doc => ({ 
-      uid: doc.id, 
-      ...doc.data(),
-      fechaRegistro: doc.data().fechaRegistro || doc.data().fechaPerf ? new Date(doc.data().fechaPerf).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
-    }));
+    const usuarios = snapshot.docs.map(doc => {
+      const data = doc.data();
+      return { 
+        uid: doc.id, 
+        ...data,
+        estado: data.estadoRegistro?.toLowerCase() || 'pendiente', // Agregar campo estado para compatibilidad
+        fechaRegistro: data.fechaRegistro || data.fechaPerf ? new Date(data.fechaPerf).toISOString().split('T')[0] : new Date().toISOString().split('T')[0]
+      };
+    });
     
     res.json(usuarios);
   } catch (error) {

@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useUser } from '../../../../context/UserContext';
 import AdminLayout from '../../../../shared/components/Layout/AdminLayout';
 import Button from '../../../../shared/components/Button';
-import { obtenerDocentes } from '../../../../api';
+import { obtenerDocentes, aprobarUsuario } from '../../../../api';
 import './AdminDocentes.css';
 
 interface Docente {
@@ -11,11 +11,10 @@ interface Docente {
   correoPersonal: string;
   correoInstitucional: string;
   identificacion: string;
-  estado: 'activo' | 'inactivo';
+  estado: 'pendiente' | 'aprobado';
   estadoRegistro: string;
   materias: string[];
   titulos: string[];
-  departamento: string;
   fechaPerf: string;
 }
 
@@ -25,7 +24,7 @@ const AdminDocentes = () => {
   const [cargando, setCargando] = useState(true);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [docenteEditando, setDocenteEditando] = useState<Docente | null>(null);
-  const [filtroEstado, setFiltroEstado] = useState<'todos' | 'activo' | 'inactivo'>('todos');
+  const [filtroEstado, setFiltroEstado] = useState<'todos' | 'pendiente' | 'aprobado'>('todos');
 
   // Datos del formulario
   const [formData, setFormData] = useState({
@@ -35,7 +34,6 @@ const AdminDocentes = () => {
     identificacion: '',
     materias: '',
     titulos: '',
-    departamento: '',
   });
 
   useEffect(() => {
@@ -65,7 +63,6 @@ const AdminDocentes = () => {
       identificacion: '',
       materias: '',
       titulos: '',
-      departamento: '',
     });
     setMostrarFormulario(true);
   };
@@ -79,7 +76,6 @@ const AdminDocentes = () => {
       identificacion: docente.identificacion,
       materias: Array.isArray(docente.materias) ? docente.materias.join(', ') : '',
       titulos: Array.isArray(docente.titulos) ? docente.titulos.join(', ') : '',
-      departamento: docente.departamento || '',
     });
     setMostrarFormulario(true);
   };
@@ -104,8 +100,8 @@ const AdminDocentes = () => {
       const nuevoDocente: Docente = {
         uid: Date.now().toString(),
         ...formData,
-        estado: 'activo',
-        estadoRegistro: 'Aprobado',
+        estado: 'pendiente',
+        estadoRegistro: 'Pendiente',
         materias: formData.materias.split(',').map(m => m.trim()).filter(Boolean),
         titulos: formData.titulos.split(',').map(t => t.trim()).filter(Boolean),
         fechaPerf: new Date().toISOString(),
@@ -117,20 +113,17 @@ const AdminDocentes = () => {
     setDocenteEditando(null);
   };
 
-  const handleActivarDocente = async (uid: string) => {
-    setDocentes(docentes.map(doc => 
-      doc.uid === uid 
-        ? { ...doc, estado: 'activo' as const }
-        : doc
-    ));
-  };
-
-  const handleDesactivarDocente = async (uid: string) => {
-    setDocentes(docentes.map(doc => 
-      doc.uid === uid 
-        ? { ...doc, estado: 'inactivo' as const }
-        : doc
-    ));
+  const handleAprobarDocente = async (uid: string) => {
+    try {
+      await aprobarUsuario(uid);
+      setDocentes(docentes.map(doc => 
+        doc.uid === uid 
+          ? { ...doc, estado: 'aprobado' as const, estadoRegistro: 'Aprobado' }
+          : doc
+      ));
+    } catch (error) {
+      console.error('Error aprobando docente:', error);
+    }
   };
 
   const handleEliminarDocente = async (uid: string) => {
@@ -190,8 +183,8 @@ const AdminDocentes = () => {
               className="filter-select"
             >
               <option value="todos">Todos</option>
-              <option value="activo">Activos</option>
-              <option value="inactivo">Inactivos</option>
+              <option value="pendiente">Pendientes</option>
+              <option value="aprobado">Aprobados</option>
             </select>
           </div>
           <div className="docentes-count">
@@ -207,7 +200,6 @@ const AdminDocentes = () => {
                 <th>Correo Personal</th>
                 <th>Correo Institucional</th>
                 <th>Identificación</th>
-                <th>Departamento</th>
                 <th>Materias</th>
                 <th>Títulos</th>
                 <th>Estado</th>
@@ -221,7 +213,6 @@ const AdminDocentes = () => {
                   <td>{docente.correoPersonal}</td>
                   <td>{docente.correoInstitucional}</td>
                   <td>{docente.identificacion}</td>
-                  <td>{docente.departamento || 'No especificado'}</td>
                   <td>
                     <div className="materias-list">
                       {Array.isArray(docente.materias) ? docente.materias.map((materia, index) => (
@@ -243,19 +234,12 @@ const AdminDocentes = () => {
                   </td>
                   <td className="acciones-cell">
                     <div className="acciones-buttons">
-                      {docente.estado === 'inactivo' ? (
+                      {docente.estado?.toLowerCase() === 'pendiente' && (
                         <Button 
-                          onClick={() => handleActivarDocente(docente.uid)}
-                          className="activar-btn"
+                          onClick={() => handleAprobarDocente(docente.uid)}
+                          className="aprobar-btn"
                         >
-                          ✅ Activar
-                        </Button>
-                      ) : (
-                        <Button 
-                          onClick={() => handleDesactivarDocente(docente.uid)}
-                          className="desactivar-btn"
-                        >
-                          ⏸️ Desactivar
+                          ✅ Aprobar
                         </Button>
                       )}
                       <Button 
@@ -324,16 +308,6 @@ const AdminDocentes = () => {
                     value={formData.identificacion}
                     onChange={(e) => setFormData({...formData, identificacion: e.target.value})}
                     required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="departamento">Departamento:</label>
-                  <input
-                    type="text"
-                    id="departamento"
-                    value={formData.departamento}
-                    onChange={(e) => setFormData({...formData, departamento: e.target.value})}
                   />
                 </div>
                 

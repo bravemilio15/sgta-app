@@ -30,6 +30,22 @@ class Usuario {
     this.passwordHash = passwordHash;
     this.passwordTemporal = passwordTemporal;
   }
+
+  // Método para convertir el objeto a JSON para Firestore
+  toJSON() {
+    return {
+      nombreCompleto: this.nombreCompleto,
+      correoPersonal: this.correoPersonal,
+      correoInstitucional: this.correoInstitucional,
+      identificacion: this.identificacion,
+      tipoIdentificacion: this.tipoIdentificacion,
+      fechaPerf: this.fechaPerf,
+      estadoRegistro: this.estadoRegistro,
+      tipo: this.tipo,
+      passwordHash: this.passwordHash,
+      passwordTemporal: this.passwordTemporal
+    };
+  }
 }
 
 // Clase Estudiante que hereda de Usuario
@@ -66,6 +82,16 @@ class Estudiante extends Usuario {
     this.asignaturasUid = Array.isArray(asignaturasUid) ? asignaturasUid : [];
     this.fechaRegistro = fechaRegistro;
   }
+
+  // Método para convertir el objeto a JSON para Firestore
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      carrera: this.carrera,
+      asignaturasUid: this.asignaturasUid,
+      fechaRegistro: this.fechaRegistro
+    };
+  }
 }
 
 // Clase Docente que hereda de Usuario
@@ -77,12 +103,11 @@ class Docente extends Usuario {
     identificacion,
     tipoIdentificacion,
     fechaPerf,
-    estadoRegistro = EstadoRegistro.APROBADO, // Los docentes vienen aprobados por defecto
+    estadoRegistro = EstadoRegistro.PENDIENTE, // Los docentes requieren aprobación por defecto
     passwordHash = null,
     passwordTemporal = null,
     asignaturasUid = [], // Array de IDs de asignaturas que imparte
     titulos = [], // Array de títulos académicos
-    departamento = ''
   }) {
     super({
       nombreCompleto,
@@ -100,7 +125,15 @@ class Docente extends Usuario {
     // Atributos específicos del docente
     this.asignaturasUid = Array.isArray(asignaturasUid) ? asignaturasUid : [];
     this.titulos = Array.isArray(titulos) ? titulos : [titulos].filter(Boolean);
-    this.departamento = departamento;
+  }
+
+  // Método para convertir el objeto a JSON para Firestore
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      asignaturasUid: this.asignaturasUid,
+      titulos: this.titulos,
+    };
   }
 }
 
@@ -133,6 +166,14 @@ class Administrador extends Usuario {
     
     // Atributos específicos del administrador
     this.nivelAcceso = nivelAcceso;
+  }
+
+  // Método para convertir el objeto a JSON para Firestore
+  toJSON() {
+    return {
+      ...super.toJSON(),
+      nivelAcceso: this.nivelAcceso
+    };
   }
 }
 

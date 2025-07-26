@@ -22,7 +22,9 @@ async function crearUsuarioAuth(email, password) {
 }
 //Guardar usuario en Firestore
 async function guardarUsuarioEnFirestore(uid, datos) {
-  return await db.collection('usuarios').doc(uid).set(datos);
+  // Convertir el objeto de clase a JSON para Firestore
+  const datosJSON = datos.toJSON ? datos.toJSON() : datos;
+  return await db.collection('usuarios').doc(uid).set(datosJSON);
 }
 
 module.exports = {
