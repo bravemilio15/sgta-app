@@ -24,7 +24,7 @@ const Header = () => {
 
   const getWelcomeMessage = () => {
     if (!user) return '';
-    
+
     switch (user.tipo) {
       case 'administrador':
         return 'Panel de Administrador';
@@ -39,23 +39,23 @@ const Header = () => {
 
   const getUserDisplayName = () => {
     if (!user) return '';
-    
+
     // Si tiene nombre completo, usarlo
     if (user.nombreCompleto) {
       return user.nombreCompleto;
     }
-    
+
     // Si no, usar el correo pero mostrar solo la parte antes del @
     if (user.correo) {
       return user.correo.split('@')[0];
     }
-    
+
     return 'Usuario';
   };
 
   const getRoleDisplayName = () => {
     if (!user) return '';
-    
+
     switch (user.tipo) {
       case 'administrador':
         return 'Administrador del Sistema';
@@ -71,7 +71,7 @@ const Header = () => {
   return (
     <header className="sgta-header">
       <div className="sgta-header__left">
-        <img src="/logo-unl.png" alt="Logo UNL" className="sgta-header__logo" />
+        <img src="/Sgta_icon.png" alt="Logo SGTA" className="sgta-header__logo" /> {/* <-- Usa la ruta pública aquí */}
         <div>
           <h1 className="sgta-header__title">Universidad Nacional de Loja</h1>
           <h2 className="sgta-header__subtitle">Sistema Gestor de Tareas – SGTA</h2>
@@ -81,7 +81,7 @@ const Header = () => {
       <div className="sgta-header__right">
         {user && (
           <div className="header-profile">
-            <div 
+            <div
               className="header-profile-trigger"
               onClick={() => setShowProfile(!showProfile)}
             >
@@ -94,7 +94,7 @@ const Header = () => {
               </div>
               {showProfile ? <FiChevronUp /> : <FiChevronDown />}
             </div>
-            
+
             {showProfile && (
               <div className="header-profile-dropdown">
                 <div className="header-profile-details">
