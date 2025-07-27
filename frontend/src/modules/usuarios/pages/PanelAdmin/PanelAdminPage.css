@@ -18,7 +18,7 @@
   background: #fff;
   padding: 2.5rem 2.5rem 1.5rem 2.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10);
   min-width: 350px;
   max-width: 500px;
   width: 100%;
@@ -56,28 +56,24 @@
 }
 
 .paneladmin-content {
-  flex: 1;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: flex-start;
-  padding: 2.5rem 0 0 0;
-  background: #f5f6fa;
-  min-height: 100vh;
-  min-width: 0;
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+  padding: 2rem;
 }
 
 .paneladmin-section {
   background: #fff;
   border-radius: 12px;
   padding: 2rem;
-  margin-top: 0;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
-  width: 90%;
-  max-width: 1100px;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10);
+  margin-bottom: 2rem;
+}
+
+.paneladmin-section h3 {
+  color: #1a3fa6;
+  font-size: 1.5rem;
+  margin-bottom: 1rem;
 }
 
 .paneladmin-table {
@@ -86,7 +82,8 @@
   margin-top: 1rem;
 }
 
-.paneladmin-table th, .paneladmin-table td {
+.paneladmin-table th,
+.paneladmin-table td {
   padding: 0.7rem 1rem;
   border-bottom: 1px solid #e0e0e0;
   text-align: left;
@@ -95,6 +92,7 @@
 .paneladmin-table th {
   background: #1a3fa6;
   color: #fff;
+  font-weight: 600;
 }
 
 .paneladmin-table td {
@@ -107,21 +105,40 @@
   border-bottom: none;
 }
 
+.paneladmin-table tr:hover td {
+  background: #f8f9fa;
+}
+
 @media (max-width: 900px) {
   .paneladmin-content {
-    padding: 1rem 0.5rem;
+    padding: 1rem;
   }
+
   .paneladmin-section {
     padding: 1rem;
-    width: 98%;
-    max-width: 98vw;
+  }
+
+  .paneladmin-table {
+    font-size: 0.9rem;
+  }
+
+  .paneladmin-table th,
+  .paneladmin-table td {
+    padding: 0.5rem 0.7rem;
   }
 }
 
 @media (max-width: 500px) {
   .paneladmin-section {
-    min-width: unset;
-    max-width: 99vw;
     padding: 0.5rem;
   }
-} 
+
+  .paneladmin-table {
+    font-size: 0.8rem;
+  }
+
+  .paneladmin-table th,
+  .paneladmin-table td {
+    padding: 0.3rem 0.5rem;
+  }
+}

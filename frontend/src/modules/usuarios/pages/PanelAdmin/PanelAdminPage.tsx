@@ -1,6 +1,5 @@
 import { useEffect, useState } from 'react';
 import { useUser } from '../../../../context/UserContext';
-import Sidebar from '../../../../shared/components/Sidebar/Sidebar';
 import Button from '../../../../shared/components/Button';
 import { obtenerUsuariosPendientes, aprobarUsuario } from '../../../../api';
 import './PanelAdminPage.css';
@@ -27,40 +26,37 @@ const PanelAdminPage = () => {
   }
 
   return (
-    <div className="paneladmin-dashboard">
-      <Sidebar />
-      <main className="paneladmin-content">
-        <h2 className="paneladmin-title">Panel de Administrador</h2>
-        <section className="paneladmin-section">
-          <h3>Estudiantes Pendientes</h3>
-          {pendientes.length === 0 ? (
-            <p>No hay estudiantes pendientes.</p>
-          ) : (
-            <table className="paneladmin-table">
-              <thead>
-                <tr>
-                  <th>Nombre</th>
-                  <th>Correo</th>
-                  <th>Identificación</th>
-                  <th>Acción</th>
+    <div className="paneladmin-content">
+      <h2 className="paneladmin-title">Panel de Administrador</h2>
+      <section className="paneladmin-section">
+        <h3>Estudiantes Pendientes</h3>
+        {pendientes.length === 0 ? (
+          <p>No hay estudiantes pendientes.</p>
+        ) : (
+          <table className="paneladmin-table">
+            <thead>
+              <tr>
+                <th>Nombre</th>
+                <th>Correo</th>
+                <th>Identificación</th>
+                <th>Acción</th>
+              </tr>
+            </thead>
+            <tbody>
+              {pendientes.map(est => (
+                <tr key={est.uid}>
+                  <td>{est.nombreCompleto}</td>
+                  <td>{est.correoInstitucional}</td>
+                  <td>{est.identificacion}</td>
+                  <td>
+                    <Button onClick={() => handleAprobar(est.uid)}>Aprobar</Button>
+                  </td>
                 </tr>
-              </thead>
-              <tbody>
-                {pendientes.map(est => (
-                  <tr key={est.uid}>
-                    <td>{est.nombreCompleto}</td>
-                    <td>{est.correoInstitucional}</td>
-                    <td>{est.identificacion}</td>
-                    <td>
-                      <Button onClick={() => handleAprobar(est.uid)}>Aprobar</Button>
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </section>
-      </main>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </section>
     </div>
   );
 };

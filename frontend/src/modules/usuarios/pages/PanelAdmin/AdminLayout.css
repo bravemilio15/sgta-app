@@ -1,0 +1,23 @@
+.admin-layout {
+  display: flex;
+  min-height: 100vh;
+  padding-top: 80px; /* Espacio para el header fijo */
+  background: #f8f9fa;
+}
+
+.admin-layout-main {
+  flex: 1;
+  padding: 2rem;
+  background: #f8f9fa;
+  overflow-y: auto;
+  margin-left: 250px; /* Espacio para el sidebar */
+  min-height: calc(100vh - 80px);
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .admin-layout-main {
+    margin-left: 250px;
+    padding: 1rem;
+  }
+} 

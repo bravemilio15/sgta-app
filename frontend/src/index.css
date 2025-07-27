@@ -10,8 +10,8 @@ html, body, #root {
   font-weight: 400;
 
   color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  color: #213547;
+  background-color: #ffffff;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
@@ -30,8 +30,6 @@ a:hover {
 
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
   min-width: 320px;
   min-height: 100vh;
 }
@@ -60,11 +58,49 @@ button:focus-visible {
   outline: 4px auto -webkit-focus-ring-color;
 }
 
+.app-bg {
+  min-height: 100vh;
+  background: #f5f5f5;
+}
+
+/* Fondo para páginas de usuarios */
+.app-bg {
+  background-image: url('/UNLFONDO.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+  position: relative;
+}
+
+/* Overlay para transparencia */
+.app-bg::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(245, 245, 245, 0.7);
+  z-index: 0;
+}
+
+.app-bg .app-main {
+  position: relative;
+  z-index: 1;
+}
+
+.app-main {
+  min-height: 100vh;
+}
+
 .login-main {
   flex: 1;
   display: flex;
   align-items: center;
   justify-content: center;
+  min-height: 100vh;
+  padding-top: 0;
 }
 
 @media (prefers-color-scheme: light) {

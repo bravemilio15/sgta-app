@@ -1,0 +1,33 @@
+.usuarios-layout {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background: transparent;
+  position: relative;
+}
+
+.usuarios-main {
+  flex: 1;
+  padding-top: 80px; /* Espacio para el header fijo */
+  padding-bottom: 60px; /* Espacio para el footer */
+  min-height: calc(100vh - 140px); /* 100vh - header (80px) - footer (60px) */
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-sizing: border-box;
+}
+
+/* Asegurar que el contenido principal tenga scroll si es necesario */
+.usuarios-main > * {
+  width: 100%;
+  max-width: 1200px;
+  margin: 0 auto;
+}
+
+/* Responsive */
+@media (max-width: 768px) {
+  .usuarios-main {
+    padding: 80px 1rem 60px 1rem;
+  }
+} 

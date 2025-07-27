@@ -1,10 +1,39 @@
 /* Fondo general */
 .login-bg {
-  min-height: 100vh;
-  min-width: 100vw;
-  background: #928d8d;
+  min-height: 100%;
+  width: 100%;
   display: flex;
   flex-direction: column;
+  background: transparent;
+  position: relative;
+}
+
+/* Fondo con imagen para la página de login */
+.login-bg::before {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url('/UNLFONDO.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  opacity: 0.8;
+  z-index: -2;
+}
+
+/* Overlay para transparencia */
+.login-bg::after {
+  content: '';
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.15);
+  z-index: -1;
 }
 
 /* Centrado del main */
@@ -18,10 +47,12 @@
 
 /* Tarjeta de login */
 .login-card {
-  background: #fff;
+  background: rgba(255, 255, 255, 0.95);
+  backdrop-filter: blur(10px);
   padding: 2.5rem 2.5rem 1.5rem 2.5rem;
-  border-radius: 8px;
-  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10);
+  border-radius: 12px;
+  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   min-width: 350px;
   max-width: 400px;
   width: 100%;
@@ -55,10 +86,19 @@
   width: 100%;
   padding: 0.5rem 0.7rem;
   border: 1px solid #b6b6b6;
-  border-radius: 5px;
+  border-radius: 8px;
   margin-bottom: 0.2rem;
   font-size: 1rem;
-  background: #eaf3fa;
+  background: rgba(255, 255, 255, 0.9);
+  backdrop-filter: blur(5px);
+  transition: all 0.3s ease;
+}
+
+.login-input:focus {
+  outline: none;
+  border-color: #1a3fa6;
+  background: rgba(255, 255, 255, 1);
+  box-shadow: 0 0 0 3px rgba(26, 63, 166, 0.1);
 }
 
 .login-remember {
