@@ -18,7 +18,7 @@
   background: #fff;
   padding: 2.5rem 2.5rem 1.5rem 2.5rem;
   border-radius: 8px;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10);
   min-width: 350px;
   max-width: 500px;
   width: 100%;
@@ -66,7 +66,7 @@
   background: #fff;
   border-radius: 12px;
   padding: 2rem;
-  box-shadow: 0 2px 16px rgba(0,0,0,0.10);
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.10);
   margin-bottom: 2rem;
 }
 
@@ -82,7 +82,8 @@
   margin-top: 1rem;
 }
 
-.paneladmin-table th, .paneladmin-table td {
+.paneladmin-table th,
+.paneladmin-table td {
   padding: 0.7rem 1rem;
   border-bottom: 1px solid #e0e0e0;
   text-align: left;
@@ -112,16 +113,17 @@
   .paneladmin-content {
     padding: 1rem;
   }
-  
+
   .paneladmin-section {
     padding: 1rem;
   }
-  
+
   .paneladmin-table {
     font-size: 0.9rem;
   }
-  
-  .paneladmin-table th, .paneladmin-table td {
+
+  .paneladmin-table th,
+  .paneladmin-table td {
     padding: 0.5rem 0.7rem;
   }
 }
@@ -130,12 +132,13 @@
   .paneladmin-section {
     padding: 0.5rem;
   }
-  
+
   .paneladmin-table {
     font-size: 0.8rem;
   }
-  
-  .paneladmin-table th, .paneladmin-table td {
+
+  .paneladmin-table th,
+  .paneladmin-table td {
     padding: 0.3rem 0.5rem;
   }
-} 
+}
