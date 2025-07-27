@@ -9,10 +9,12 @@ import AdminEstudiantes from '../modules/usuarios/pages/PanelAdmin/AdminEstudian
 import AdminDocentes from '../modules/usuarios/pages/PanelAdmin/AdminDocentes';
 import AdminAsignaturas from '../modules/usuarios/pages/PanelAdmin/AdminAsignaturas';
 import AdminReportes from '../modules/usuarios/pages/PanelAdmin/AdminReportes';
+import AdminConfiguracion from '../modules/usuarios/pages/PanelAdmin/AdminConfiguracion';
 import OlvidarContra from '../modules/usuarios/pages/OlvidarContrasena/olvidarContra';
 import CambiarContrasena from '../modules/usuarios/pages/OlvidarContrasena/CambiarContrasena';
 import Header from '../shared/components/Header';
 import Layout from '../shared/components/Layout/Layout';
+import AdminLayout from '../shared/components/Layout/AdminLayout';
 import '../index.css';
 import InicioEstudiantePage from '../modules/tareas/menu/InicioEstudiantePage';
 import InicioDocentePage from '../modules/tareas/pages/InicioDocentePage';
@@ -131,27 +133,32 @@ export default function AppRouter() {
             {/* Rutas del administrador */}
             <Route path="/panel-admin" element={
               <ProtectedRoute allowedTypes={['administrador']}>
-                <AdminDashboard />
+                <AdminLayout><AdminDashboard /></AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/panel-admin/estudiantes" element={
               <ProtectedRoute allowedTypes={['administrador']}>
-                <AdminEstudiantes />
+                <AdminLayout><AdminEstudiantes /></AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/panel-admin/docentes" element={
               <ProtectedRoute allowedTypes={['administrador']}>
-                <AdminDocentes />
+                <AdminLayout><AdminDocentes /></AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/panel-admin/asignaturas" element={
               <ProtectedRoute allowedTypes={['administrador']}>
-                <AdminAsignaturas />
+                <AdminLayout><AdminAsignaturas /></AdminLayout>
               </ProtectedRoute>
             } />
             <Route path="/panel-admin/reportes" element={
               <ProtectedRoute allowedTypes={['administrador']}>
-                <AdminReportes />
+                <AdminLayout><AdminReportes /></AdminLayout>
+              </ProtectedRoute>
+            } />
+            <Route path="/panel-admin/configuracion" element={
+              <ProtectedRoute allowedTypes={['administrador']}>
+                <AdminLayout><AdminConfiguracion /></AdminLayout>
               </ProtectedRoute>
             } />
             

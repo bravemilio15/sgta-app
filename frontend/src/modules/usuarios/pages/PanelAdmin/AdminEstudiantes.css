@@ -1,8 +1,11 @@
 .admin-estudiantes {
   width: 100%;
-  max-width: 1400px;
-  margin: 0 auto;
-  background: transparent;
+  max-width: none;
+  margin: 0;
+  padding: 20px;
+  background: #f8f9fa;
+  box-sizing: border-box;
+  min-height: calc(100vh - 80px);
 }
 
 .admin-estudiantes-loading,
@@ -34,13 +37,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding-bottom: 1rem;
-  border-bottom: 2px solid #e0e0e0;
+  margin-bottom: 20px;
+  padding: 20px;
   background: #fff;
-  padding: 1.5rem;
   border-radius: 12px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
 }
 
 .admin-estudiantes-title {
@@ -77,11 +79,12 @@
   display: flex;
   justify-content: space-between;
   align-items: center;
-  margin-bottom: 2rem;
-  padding: 1rem;
+  margin-bottom: 20px;
+  padding: 15px 20px;
   background: #fff;
-  border-radius: 8px;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
 }
 
 .filter-group {
@@ -112,28 +115,30 @@
 .admin-estudiantes-table-container {
   background: #fff;
   border-radius: 12px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
   overflow-x: auto;
   overflow-y: hidden;
+  padding: 20px;
 }
 
 .admin-estudiantes-table {
   width: 100%;
   border-collapse: collapse;
-  min-width: 1200px;
+  min-width: 100%;
 }
 
 .admin-estudiantes-table th {
   background: #1a3fa6;
   color: #fff;
-  padding: 1rem;
+  padding: 12px 15px;
   text-align: left;
   font-weight: 600;
   font-size: 0.9rem;
 }
 
 .admin-estudiantes-table td {
-  padding: 1rem;
+  padding: 12px 15px;
   border-bottom: 1px solid #e0e0e0;
   color: #333;
   font-size: 0.9rem;
@@ -170,8 +175,8 @@
 }
 
 .acciones-cell {
-  width: 280px;
-  min-width: 280px;
+  width: 200px;
+  min-width: 200px;
 }
 
 .acciones-buttons {

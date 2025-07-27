@@ -1,11 +1,23 @@
 .admin-asignaturas {
-  padding: 2rem;
-  background-color: #f8f9fa;
-  min-height: 100vh;
+  width: 100%;
+  max-width: none;
+  margin: 0;
+  padding: 20px;
+  background: #f8f9fa;
+  box-sizing: border-box;
+  min-height: calc(100vh - 80px);
 }
 
 .admin-asignaturas-header {
-  margin-bottom: 2rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 20px;
+  background: #fff;
+  border-radius: 12px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
 }
 
 .admin-asignaturas-title {
@@ -47,8 +59,9 @@
 .admin-asignaturas-content {
   background: white;
   border-radius: 12px;
-  padding: 2rem;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+  border: 1px solid #e9ecef;
 }
 
 .admin-asignaturas-empty {
@@ -70,17 +83,17 @@
 
 .admin-asignaturas-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-  gap: 1.5rem;
+  grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  gap: 20px;
 }
 
 .asignatura-card {
   background: white;
   border: 1px solid #e9ecef;
   border-radius: 12px;
-  padding: 1.5rem;
+  padding: 20px;
   transition: all 0.3s ease;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
 }
 
 .asignatura-card:hover {

@@ -3,7 +3,7 @@ import Button from '../../../../shared/components/Button';
 import UsuariosLayout from '../../UsuariosLayout';
 import './RegisterPage.css';
 import { useNavigate } from 'react-router-dom';
-import { registrarUsuario, obtenerAsignaturas } from '../../../../api';
+import { registrarEstudianteConMatriculas, obtenerAsignaturas, obtenerPeriodoActivo } from '../../../../api';
 
 const RegisterPage = () => {
   const navigate = useNavigate();
@@ -14,16 +14,19 @@ const RegisterPage = () => {
   const [segundoApellido, setSegundoApellido] = useState('');
   const [identificacion, setIdentificacion] = useState('');
   const [tipoIdentificacion, setTipoIdentificacion] = useState('cedula');
-  const [asignatura, setAsignatura] = useState('');
+  const [asignaturasSeleccionadas, setAsignaturasSeleccionadas] = useState<string[]>([]);
   const [correoPersonal, setCorreoPersonal] = useState('');
   const [emailUser, setEmailUser] = useState('');
   const [loading, setLoading] = useState(false);
   const [mensaje, setMensaje] = useState('');
   const [asignaturas, setAsignaturas] = useState<Array<{id: string, codigo: string, nombre: string}>>([]);
   const [cargandoAsignaturas, setCargandoAsignaturas] = useState(true);
+  const [periodoActivo, setPeriodoActivo] = useState<{id: string, nombre: string} | null>(null);
+  const [cargandoPeriodo, setCargandoPeriodo] = useState(true);
 
   useEffect(() => {
     cargarAsignaturas();
+    cargarPeriodoActivo();
   }, []);
 
   const cargarAsignaturas = async () => {
@@ -31,13 +34,24 @@ const RegisterPage = () => {
       setCargandoAsignaturas(true);
       const asignaturasData = await obtenerAsignaturas();
       setAsignaturas(asignaturasData);
-      if (asignaturasData.length > 0) {
-        setAsignatura(asignaturasData[0].id);
-      }
     } catch (error) {
       console.error('Error al cargar asignaturas:', error);
     } finally {
       setCargandoAsignaturas(false);
+    }
+  };
+
+  const cargarPeriodoActivo = async () => {
+    try {
+      setCargandoPeriodo(true);
+      const periodoData = await obtenerPeriodoActivo();
+      if (periodoData.periodo) {
+        setPeriodoActivo(periodoData.periodo);
+      }
+    } catch (error) {
+      console.error('Error al cargar período activo:', error);
+    } finally {
+      setCargandoPeriodo(false);
     }
   };
 
@@ -49,6 +63,18 @@ const RegisterPage = () => {
     // Validar campos requeridos
     if (!emailUser) {
       setMensaje('Error: Debes completar el correo institucional');
+      setLoading(false);
+      return;
+    }
+
+    if (asignaturasSeleccionadas.length === 0) {
+      setMensaje('Error: Debes seleccionar al menos una asignatura');
+      setLoading(false);
+      return;
+    }
+
+    if (!periodoActivo) {
+      setMensaje('Error: No hay un período académico activo');
       setLoading(false);
       return;
     }
@@ -71,11 +97,12 @@ const RegisterPage = () => {
         segundoApellido,
         identificacion,
         tipoIdentificacion,
-        asignatura,
         correoPersonal,
-        correoUsuario: emailUser
+        correoUsuario: emailUser,
+        asignaturasIds: asignaturasSeleccionadas,
+        periodoId: periodoActivo.id
       };
-      const res = await registrarUsuario(datos);
+      const res = await registrarEstudianteConMatriculas(datos);
       if (res && res.message) {
         setMensaje('¡Registro exitoso! Tu cuenta está pendiente de aprobación por el administrador.');
         // Limpiar campos
@@ -85,10 +112,9 @@ const RegisterPage = () => {
         setSegundoApellido('');
         setIdentificacion('');
         setTipoIdentificacion('cedula');
-        setAsignatura(asignaturas.length > 0 ? asignaturas[0].id : '');
+        setAsignaturasSeleccionadas([]);
         setCorreoPersonal('');
         setEmailUser('');
-        // Opcional: limpiar otros estados si agregas más
       } else {
         setMensaje('Error: ' + (res.error || 'No se pudo registrar.'));
       }
@@ -97,6 +123,14 @@ const RegisterPage = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const toggleAsignatura = (asignaturaId: string) => {
+    setAsignaturasSeleccionadas(prev => 
+      prev.includes(asignaturaId)
+        ? prev.filter(id => id !== asignaturaId)
+        : [...prev, asignaturaId]
+    );
   };
 
   return (
@@ -130,30 +164,77 @@ const RegisterPage = () => {
                 <option value="pasaporte">Pasaporte</option>
               </select>
             </div>
-            <label htmlFor="subject" style={{ width: '100%' }}>Asignatura:</label>
-            <select 
-              id="subject" 
-              className="register-input" 
-              style={{ width: '100%' }} 
-              value={asignatura} 
-              onChange={e => setAsignatura(e.target.value)}
-              disabled={cargandoAsignaturas}
-            >
-              {cargandoAsignaturas ? (
-                <option>Cargando asignaturas...</option>
-              ) : asignaturas.length === 0 ? (
-                <option value="">No hay asignaturas disponibles</option>
+            <label htmlFor="periodo" style={{ width: '100%' }}>Período Académico:</label>
+            <div style={{ 
+              padding: '0.5rem', 
+              backgroundColor: '#f0f0f0', 
+              borderRadius: '8px', 
+              marginBottom: '1rem',
+              border: '1px solid #ddd'
+            }}>
+              {cargandoPeriodo ? (
+                <div>Cargando período académico...</div>
+              ) : periodoActivo ? (
+                <div style={{ fontWeight: 'bold', color: '#1a3fa6' }}>
+                  {periodoActivo.nombre}
+                </div>
               ) : (
-                <>
-                  <option value="">Seleccionar asignatura</option>
-                  {asignaturas.map((asig) => (
-                    <option key={asig.id} value={asig.id}>
-                      {asig.codigo} - {asig.nombre}
-                    </option>
-                  ))}
-                </>
+                <div style={{ color: '#e53935', fontWeight: 'bold' }}>
+                  No hay período académico activo
+                </div>
               )}
-            </select>
+            </div>
+
+            <label htmlFor="asignaturas" style={{ width: '100%' }}>Asignaturas:</label>
+            <div style={{ 
+              maxHeight: '200px', 
+              overflowY: 'auto', 
+              border: '1px solid #ddd', 
+              borderRadius: '8px',
+              padding: '0.5rem'
+            }}>
+              {cargandoAsignaturas ? (
+                <div>Cargando asignaturas...</div>
+              ) : asignaturas.length === 0 ? (
+                <div style={{ color: '#666', fontStyle: 'italic' }}>
+                  No hay asignaturas disponibles
+                </div>
+              ) : (
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem' }}>
+                  {asignaturas.map((asig) => (
+                    <label key={asig.id} style={{ 
+                      display: 'flex', 
+                      alignItems: 'center', 
+                      gap: '0.5rem',
+                      cursor: 'pointer',
+                      padding: '0.3rem',
+                      borderRadius: '4px',
+                      backgroundColor: asignaturasSeleccionadas.includes(asig.id) ? '#e3f2fd' : 'transparent'
+                    }}>
+                      <input
+                        type="checkbox"
+                        checked={asignaturasSeleccionadas.includes(asig.id)}
+                        onChange={() => toggleAsignatura(asig.id)}
+                        style={{ margin: 0 }}
+                      />
+                      <span style={{ fontSize: '0.9rem' }}>
+                        {asig.codigo} - {asig.nombre}
+                      </span>
+                    </label>
+                  ))}
+                </div>
+              )}
+            </div>
+            {asignaturasSeleccionadas.length > 0 && (
+              <div style={{ 
+                fontSize: '0.8rem', 
+                color: '#666', 
+                marginTop: '0.3rem',
+                fontStyle: 'italic'
+              }}>
+                Seleccionadas: {asignaturasSeleccionadas.length} asignatura(s)
+              </div>
+            )}
             
             <label htmlFor="correoPersonal" style={{ width: '100%', marginTop: '0.7rem' }}>
               Correo personal:

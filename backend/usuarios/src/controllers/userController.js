@@ -81,8 +81,8 @@ async function registrarUsuario(req, res) {
       passwordHash: hashedPassword,
       passwordTemporal: plainPassword,
       carrera: 'Computación', // Quemada como solicitaste
-      asignaturasUid: [],
-      fechaRegistro: fechaPerf
+      fechaRegistro: fechaPerf,
+      estadoAcademico: 'REGULAR'
     });
 
     // Guardar en Firestore
@@ -560,8 +560,136 @@ async function obtenerEstadisticas(req, res) {
   }
 }
 
+// Registrar estudiante con matrículas
+async function registrarEstudianteConMatriculas(req, res) {
+  try {
+    const {
+      primerNombre,
+      segundoNombre,
+      primerApellido,
+      segundoApellido,
+      identificacion,
+      tipoIdentificacion,
+      correoPersonal,
+      correoUsuario,
+      asignaturasIds,
+      periodoId
+    } = req.body;
+
+    // Validar campos requeridos
+    if (!primerNombre || !primerApellido || !identificacion || !tipoIdentificacion || !correoPersonal || !correoUsuario) {
+      return res.status(400).json({ 
+        error: 'Todos los campos son obligatorios: primerNombre, primerApellido, identificacion, tipoIdentificacion, correoPersonal, correoUsuario' 
+      });
+    }
+
+    if (!asignaturasIds || !Array.isArray(asignaturasIds) || asignaturasIds.length === 0) {
+      return res.status(400).json({
+        error: 'Debe seleccionar al menos una asignatura'
+      });
+    }
+
+    if (!periodoId) {
+      return res.status(400).json({
+        error: 'periodoId es obligatorio'
+      });
+    }
+
+    // Construir correo institucional
+    const correoInstitucional = `${correoUsuario}@uni.edu.ec`;
+    // Generar nombre completo
+    const nombreCompleto = `${primerNombre} ${segundoNombre} ${primerApellido} ${segundoApellido}`.replace(/  +/g, ' ').trim();
+    // Fecha de creación
+    const fechaPerf = new Date().toISOString();
+
+    // Verificar si ya existe un usuario con esa identificación
+    const db = admin.firestore();
+    const usuariosRef = db.collection('usuarios');
+    const queryIdentificacion = await usuariosRef.where('identificacion', '==', identificacion).get();
+    
+    if (!queryIdentificacion.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con esa identificación' 
+      });
+    }
+
+    // Verificar si ya existe un usuario con ese correo personal
+    const queryCorreoPersonal = await usuariosRef.where('correoPersonal', '==', correoPersonal).get();
+    
+    if (!queryCorreoPersonal.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con ese correo personal' 
+      });
+    }
+
+    // Verificar si ya existe un usuario con ese correo institucional
+    const queryCorreoInstitucional = await usuariosRef.where('correoInstitucional', '==', correoInstitucional).get();
+    
+    if (!queryCorreoInstitucional.empty) {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario registrado con ese correo institucional' 
+      });
+    }
+
+    // Para estudiantes: siempre generar contraseña temporal
+    const plainPassword = Math.random().toString(36).slice(-8) + 'A1';
+    // Crear usuario en Auth
+    const userRecord = await crearUsuarioAuth(correoInstitucional, plainPassword);
+    // Hashear la contraseña para guardar en Firestore
+    const hashedPassword = await bcrypt.hash(plainPassword, 10);
+
+    // Crear objeto estudiante usando la nueva clase
+    const estudiante = new Estudiante({
+      nombreCompleto,
+      correoPersonal,
+      correoInstitucional,
+      identificacion,
+      tipoIdentificacion,
+      fechaPerf,
+      estadoRegistro: EstadoRegistro.PENDIENTE,
+      passwordHash: hashedPassword,
+      passwordTemporal: plainPassword,
+      carrera: 'Computación',
+      fechaRegistro: fechaPerf,
+      estadoAcademico: 'REGULAR'
+    });
+
+    // Guardar en Firestore
+    await guardarUsuarioEnFirestore(userRecord.uid, estudiante);
+
+    // Crear matrícula para las asignaturas seleccionadas
+    const MatriculaService = require('../services/matriculaService');
+    const matricula = await MatriculaService.crearMatricula(
+      userRecord.uid, 
+      periodoId, 
+      asignaturasIds
+    );
+
+    res.status(201).json({
+      message: '¡Registro exitoso! Tu cuenta está pendiente de aprobación por el administrador.',
+      uid: userRecord.uid,
+      correoInstitucional,
+      matricula: matricula.toJSON()
+    });
+  } catch (error) {
+    console.error('Error al registrar estudiante con matrículas:', error);
+    
+    // Manejar errores específicos de Firebase Auth
+    if (error.code === 'auth/email-already-exists') {
+      return res.status(400).json({ 
+        error: 'Ya existe un usuario con ese correo institucional' 
+      });
+    }
+    
+    res.status(500).json({ 
+      error: 'Error interno del servidor: ' + error.message 
+    });
+  }
+}
+
 module.exports = { 
   registrarUsuario, 
+  registrarEstudianteConMatriculas,
   aprobarUsuario, 
   registrarAdministrador, 
   registrarDocente, 
