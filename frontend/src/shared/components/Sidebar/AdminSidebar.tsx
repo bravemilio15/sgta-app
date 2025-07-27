@@ -6,7 +6,8 @@ import {
   FiBarChart2, 
   FiUsers, 
   FiLogOut,
-  FiBook
+  FiBook,
+  FiSettings
 } from 'react-icons/fi';
 
 const AdminSidebar = () => {
@@ -31,6 +32,7 @@ const AdminSidebar = () => {
     { to: '/panel-admin/docentes', label: 'Docentes', icon: <FiUsers /> },
     { to: '/panel-admin/asignaturas', label: 'Asignaturas', icon: <FiBook /> },
     { to: '/panel-admin/reportes', label: 'Reportes', icon: <FiBarChart2 /> },
+    { to: '/panel-admin/configuracion', label: 'Configuración', icon: <FiSettings /> },
   ];
 
   const isActive = (path: string, exact: boolean = false) => {

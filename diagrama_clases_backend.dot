@@ -1,0 +1,114 @@
+digraph BackendSGTA {
+  // Configuración del gráfico
+  rankdir=TB;
+  node [shape=record, fontname="Arial", fontsize=10];
+  edge [fontname="Arial", fontsize=8];
+  
+  // Enumeraciones
+  subgraph cluster_enums {
+    label="Enumeraciones";
+    style=filled;
+    color=lightgrey;
+    
+    EstadoRegistro [label="{EstadoRegistro|PENDIENTE\lAPROBADO\lRECHAZADO\l}"];
+    TiposTarea [label="{TiposTarea|APE\lAA\lACD\l}"];
+    TipoNotificacion [label="{TipoNotificacion|info\lwarning\lsuccess\lerror\l}"];
+    EstadoNotificacion [label="{EstadoNotificacion|no_leida\lleida\l}"];
+  }
+  
+  // Clases de Modelo
+  subgraph cluster_models {
+    label="Modelos";
+    style=filled;
+    color=lightblue;
+    
+    Usuario [label="{Usuario|+ nombreCompleto: String\l+ correoPersonal: String\l+ correoInstitucional: String\l+ identificacion: String\l+ tipoIdentificacion: String\l+ fechaPerf: Date\l+ estadoRegistro: EstadoRegistro\l+ tipo: String\l+ passwordHash: String\l+ passwordTemporal: String\l|+ toJSON(): Object\l}"];
+    
+    Estudiante [label="{Estudiante|+ carrera: String\l+ asignaturasUid: String[]\l+ fechaRegistro: Date\l|+ toJSON(): Object\l}"];
+    
+    Docente [label="{Docente|+ asignaturasUid: String[]\l+ titulos: String[]\l|+ toJSON(): Object\l}"];
+    
+    Administrador [label="{Administrador|+ nivelAcceso: String\l|+ toJSON(): Object\l}"];
+    
+    Tarea [label="{Tarea|+ id: String\l+ titulo: String\l+ descripcion: String\l+ fechaInicio: Date\l+ fechaEntrega: Date\l+ tipo: TiposTarea\l+ permiteEntregaTardia: Boolean\l+ diasPermitidosEntregaTardia: Number\l+ porcentajePenalizacionEntregaTardia: Number\l+ esGrupal: Boolean\l|+ configurarEntregaTardia(permitir: Boolean): void\l}"];
+    
+    Asignatura [label="{Asignatura|+ id: String\l+ codigo: String\l+ nombre: String\l+ carrera: String\l+ docenteUid: String\l+ estudiantesUid: String[]\l|+ agregarEstudiante(estudianteUid: String): void\l+ removerEstudiante(estudianteUid: String): void\l+ tieneEstudiante(estudianteUid: String): Boolean\l+ getNumeroEstudiantes(): Number\l+ esValida(): Boolean\l+ toJSON(): Object\l}"];
+    
+    Notificacion [label="{Notificacion|+ id: String\l+ titulo: String\l+ mensaje: String\l+ tipo: TipoNotificacion\l+ estado: EstadoNotificacion\l+ destinatarioUid: String\l+ remitenteUid: String\l+ remitente: String\l+ accionUrl: String\l+ fechaCreacion: Date\l+ fechaLectura: Date\l|+ generarId(): String\l+ marcarComoLeida(): void\l+ marcarComoNoLeida(): void\l+ toJSON(): Object\l}"];
+  }
+  
+  // Controladores
+  subgraph cluster_controllers {
+    label="Controladores";
+    style=filled;
+    color=lightgreen;
+    
+    UserController [label="{UserController|+ registrarUsuario(req, res): Promise\l+ aprobarUsuario(req, res): Promise\l+ registrarAdministrador(req, res): Promise\l+ registrarDocente(req, res): Promise\l+ solicitarRecuperacionContrasena(req, res): Promise\l+ cambiarContrasenaConToken(req, res): Promise\l+ obtenerUsuarioPorUid(req, res): Promise\l+ obtenerUsuariosPendientes(req, res): Promise\l+ obtenerUsuariosPorTipo(req, res): Promise\l+ obtenerEstadisticas(req, res): Promise\l}"];
+    
+    TaskController [label="{TaskController|+ registrarTarea(req, res): Promise\l+ obtenerTareas(req, res): Promise\l+ editarTarea(req, res): Promise\l+ eliminarTarea(req, res): Promise\l}"];
+    
+    AsignaturaController [label="{AsignaturaController|+ crearAsignatura(req, res): Promise\l+ obtenerAsignaturas(req, res): Promise\l+ obtenerAsignatura(req, res): Promise\l+ editarAsignatura(req, res): Promise\l+ eliminarAsignatura(req, res): Promise\l+ obtenerAsignaturasPorDocente(req, res): Promise\l+ obtenerAsignaturasPorEstudiante(req, res): Promise\l+ agregarEstudiante(req, res): Promise\l+ removerEstudiante(req, res): Promise\l+ asignarDocente(req, res): Promise\l}"];
+    
+    NotificacionesController [label="{NotificacionesController|+ obtenerNotificacionesUsuario(req, res): Promise\l+ crearNotificacion(req, res): Promise\l+ marcarComoLeida(req, res): Promise\l+ marcarComoNoLeida(req, res): Promise\l+ eliminarNotificacion(req, res): Promise\l+ marcarTodasComoLeidas(req, res): Promise\l+ contarNoLeidas(req, res): Promise\l}"];
+  }
+  
+  // Servicios
+  subgraph cluster_services {
+    label="Servicios";
+    style=filled;
+    color=lightyellow;
+    
+    FirebaseService [label="{FirebaseService|+ crearUsuarioAuth(email, password): Promise\l+ guardarUsuarioEnFirestore(uid, datos): Promise\l+ guardarTareaEnFirestore(tarea): Promise\l+ obtenerTareasDeFirestore(): Promise\l+ editarTareaEnFirestore(id, datos): Promise\l+ eliminarTareaEnFirestore(id): Promise\l+ guardarAsignaturaEnFirestore(asignatura): Promise\l+ obtenerAsignaturasDeFirestore(): Promise\l+ obtenerAsignaturaPorId(id): Promise\l+ editarAsignaturaEnFirestore(id, datos): Promise\l+ eliminarAsignaturaDeFirestore(id): Promise\l+ obtenerAsignaturasPorDocente(docenteUid): Promise\l+ obtenerAsignaturasPorEstudiante(estudianteUid): Promise\l+ agregarEstudianteAAsignatura(asignaturaId, estudianteUid): Promise\l+ removerEstudianteDeAsignatura(asignaturaId, estudianteUid): Promise\l}"];
+    
+    MailService [label="{MailService|+ enviarCorreo(destinatario, asunto, texto): Promise\l}"];
+    
+    NotificacionesService [label="{NotificacionesService|+ obtenerNotificacionesUsuario(uid, limite): Promise\l+ crearNotificacion(datos): Promise\l+ marcarComoLeida(id): Promise\l+ marcarComoNoLeida(id): Promise\l+ eliminarNotificacion(id): Promise\l+ marcarTodasComoLeidas(uid): Promise\l+ contarNoLeidas(uid): Promise\l}"];
+  }
+  
+  // Rutas
+  subgraph cluster_routes {
+    label="Rutas";
+    style=filled;
+    color=lightcoral;
+    
+    UserRoutes [label="{UserRoutes|+ POST /registrar\l+ POST /aprobar\l+ POST /admin/registrar\l+ POST /docente/registrar\l+ POST /recuperar-contrasena\l+ POST /cambiar-contrasena\l+ GET /:uid\l+ GET /pendientes\l+ GET /tipo/:tipo\l+ GET /estadisticas\l}"];
+    
+    TaskRoutes [label="{TaskRoutes|+ POST /\l+ GET /\l+ PUT /:id\l+ DELETE /:id\l}"];
+    
+    AsignaturaRoutes [label="{AsignaturaRoutes|+ POST /\l+ GET /\l+ GET /:id\l+ PUT /:id\l+ DELETE /:id\l+ GET /docente/:docenteUid\l+ GET /estudiante/:estudianteUid\l+ POST /agregar-estudiante\l+ POST /remover-estudiante\l+ POST /asignar-docente\l}"];
+    
+    NotificacionesRoutes [label="{NotificacionesRoutes|+ GET /usuario/:uid\l+ POST /\l+ PUT /:id/leida\l+ PUT /:id/no-leida\l+ DELETE /:id\l+ PUT /usuario/:uid/todas-leidas\l+ GET /usuario/:uid/contar-no-leidas\l}"];
+  }
+  
+  // Herencia
+  Estudiante -> Usuario [arrowhead=empty];
+  Docente -> Usuario [arrowhead=empty];
+  Administrador -> Usuario [arrowhead=empty];
+  
+  // Relaciones de composición
+  UserController -> FirebaseService [style=dashed];
+  UserController -> MailService [style=dashed];
+  TaskController -> FirebaseService [style=dashed];
+  AsignaturaController -> FirebaseService [style=dashed];
+  NotificacionesController -> NotificacionesService [style=dashed];
+  
+  // Relaciones de uso
+  UserController -> Usuario [style=dotted];
+  UserController -> Estudiante [style=dotted];
+  UserController -> Docente [style=dotted];
+  UserController -> Administrador [style=dotted];
+  TaskController -> Tarea [style=dotted];
+  AsignaturaController -> Asignatura [style=dotted];
+  NotificacionesController -> Notificacion [style=dotted];
+  
+  // Relaciones entre entidades
+  Estudiante -> Asignatura [label="matriculado en", style=dashed];
+  Docente -> Asignatura [label="imparte", style=dashed];
+  Notificacion -> Usuario [label="destinada a", style=dashed];
+  
+  // Dependencias de enumeraciones
+  Usuario -> EstadoRegistro [style=dotted];
+  Tarea -> TiposTarea [style=dotted];
+  Notificacion -> TipoNotificacion [style=dotted];
+  Notificacion -> EstadoNotificacion [style=dotted];
+} 

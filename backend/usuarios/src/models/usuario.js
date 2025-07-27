@@ -61,8 +61,8 @@ class Estudiante extends Usuario {
     passwordHash = null,
     passwordTemporal = null,
     carrera = 'Computación', // Quemada en Computación
-    asignaturasUid = [], // Array de IDs de asignaturas en las que está matriculado
-    fechaRegistro = new Date().toISOString()
+    fechaRegistro = new Date().toISOString(),
+    estadoAcademico = 'REGULAR' // REGULAR, IRREGULAR, GRADUADO, RETIRADO
   }) {
     super({
       nombreCompleto,
@@ -79,8 +79,14 @@ class Estudiante extends Usuario {
     
     // Atributos específicos del estudiante
     this.carrera = carrera;
-    this.asignaturasUid = Array.isArray(asignaturasUid) ? asignaturasUid : [];
     this.fechaRegistro = fechaRegistro;
+    this.estadoAcademico = estadoAcademico;
+  }
+
+  // Método para verificar si puede matricularse
+  puedeMatricularse() {
+    return this.estadoRegistro === EstadoRegistro.APROBADO && 
+           this.estadoAcademico === 'REGULAR';
   }
 
   // Método para convertir el objeto a JSON para Firestore
@@ -88,8 +94,8 @@ class Estudiante extends Usuario {
     return {
       ...super.toJSON(),
       carrera: this.carrera,
-      asignaturasUid: this.asignaturasUid,
-      fechaRegistro: this.fechaRegistro
+      fechaRegistro: this.fechaRegistro,
+      estadoAcademico: this.estadoAcademico
     };
   }
 }

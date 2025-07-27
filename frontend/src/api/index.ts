@@ -12,6 +12,29 @@ export async function registrarUsuario(datos: any) {
   return response.json();
 }
 
+// Registrar estudiante con matrículas
+export async function registrarEstudianteConMatriculas(datos: {
+  // Datos del estudiante
+  primerNombre: string;
+  segundoNombre: string;
+  primerApellido: string;
+  segundoApellido: string;
+  identificacion: string;
+  tipoIdentificacion: string;
+  correoPersonal: string;
+  correoUsuario: string;
+  // Datos de matrículas
+  asignaturasIds: string[];
+  periodoId: string;
+}) {
+  const response = await fetch(`${API_BASE}/usuarios/register-with-matriculas`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
 export async function aprobarUsuario(uid: string) {
   const response = await fetch(`${API_BASE}/usuarios/approve`, {
     method: 'POST',
@@ -201,6 +224,127 @@ export async function cambiarContrasenaConToken(token: string, uid: string, nuev
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ token, uid, nuevaContrasena })
+  });
+  return response.json();
+}
+
+// Períodos Académicos
+export async function obtenerPeriodosAcademicos() {
+  const response = await fetch(`${API_BASE}/usuarios/periodos-academicos`);
+  if (!response.ok) {
+    throw new Error(`Error al obtener períodos académicos: ${response.status}`);
+  }
+  return response.json();
+}
+
+export async function obtenerPeriodoActivo() {
+  const response = await fetch(`${API_BASE}/usuarios/periodos-academicos/activo`);
+  return response.json();
+}
+
+export async function crearPeriodoAcademico(datos: {
+  nombre: string;
+  fechaInicio: string;
+  fechaFin: string;
+  tipo: string;
+  estado: string;
+  descripcion?: string;
+}) {
+  const response = await fetch(`${API_BASE}/usuarios/periodos-academicos`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function actualizarPeriodoAcademico(id: string, datos: {
+  nombre?: string;
+  fechaInicio?: string;
+  fechaFin?: string;
+  tipo?: string;
+  descripcion?: string;
+  estado?: string;
+}) {
+  const response = await fetch(`${API_BASE}/usuarios/periodos-academicos/${id}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function eliminarPeriodoAcademico(id: string) {
+  const response = await fetch(`${API_BASE}/usuarios/periodos-academicos/${id}`, {
+    method: 'DELETE'
+  });
+  return response.json();
+}
+
+export async function activarPeriodoAcademico(id: string) {
+  const response = await fetch(`${API_BASE}/usuarios/periodos-academicos/${id}/activar`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.json();
+}
+
+export async function finalizarPeriodoAcademico(id: string) {
+  const response = await fetch(`${API_BASE}/usuarios/periodos-academicos/${id}/finalizar`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
+  });
+  return response.json();
+}
+
+export async function obtenerPeriodosPorEstado(estado: string) {
+  const response = await fetch(`${API_BASE}/usuarios/periodos-academicos/estado/${estado}`);
+  if (!response.ok) {
+    throw new Error(`Error al obtener períodos por estado: ${response.status}`);
+  }
+  return response.json();
+}
+
+// Matrículas
+export async function crearMatricula(datos: {
+  estudianteUid: string;
+  asignaturaId: string;
+  periodoId: string;
+}) {
+  const response = await fetch(`${API_BASE}/usuarios/matriculas`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function crearMatriculasMasivas(datos: {
+  estudianteUid: string;
+  asignaturasIds: string[];
+  periodoId: string;
+}) {
+  const response = await fetch(`${API_BASE}/usuarios/matriculas/masivas`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function obtenerMatriculasEstudiante(estudianteUid: string, periodoId?: string) {
+  const url = periodoId 
+    ? `${API_BASE}/usuarios/matriculas/estudiante/${estudianteUid}?periodoId=${periodoId}`
+    : `${API_BASE}/usuarios/matriculas/estudiante/${estudianteUid}`;
+  const response = await fetch(url);
+  return response.json();
+}
+
+export async function asignarNotaUnidad(matriculaId: string, tipoUnidad: 'AA' | 'APE' | 'ACD', nota: number) {
+  const response = await fetch(`${API_BASE}/usuarios/matriculas/${matriculaId}/unidad`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ tipoUnidad, nota })
   });
   return response.json();
 }
