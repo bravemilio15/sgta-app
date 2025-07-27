@@ -11,6 +11,11 @@ const {
   obtenerDashboardEstudiante,
   obtenerTareasDocente,
   obtenerDetalleTarea,
+  obtenerTareaEspecifica,
+  obtenerEntregasTarea,
+  obtenerEntregaEspecifica,
+  actualizarEntregaEstudiante,
+  eliminarEntregaEstudiante,
   validacionesCrearTarea
 } = require('../controllers/taskController');
 const { verificarToken, verificarRol } = require('../middleware/auth');
@@ -66,6 +71,41 @@ router.get(
   '/:tareaId/detalle', 
   verificarRol(['docente']), 
   obtenerDetalleTarea
+);
+
+// Obtener una tarea específica (para editar)
+router.get(
+  '/:tareaId',
+  verificarRol(['docente', 'estudiante']),
+  obtenerTareaEspecifica
+);
+
+// Obtener entregas de una tarea
+router.get(
+  '/:tareaId/entregas',
+  verificarRol(['docente']),
+  obtenerEntregasTarea
+);
+
+// Obtener entrega específica
+router.get(
+  '/entregas/:entregaId',
+  verificarRol(['docente', 'estudiante']),
+  obtenerEntregaEspecifica
+);
+
+// Actualizar entrega
+router.put(
+  '/entregas/:entregaId',
+  verificarRol(['estudiante']),
+  actualizarEntregaEstudiante
+);
+
+// Eliminar entrega
+router.delete(
+  '/entregas/:entregaId',
+  verificarRol(['estudiante']),
+  eliminarEntregaEstudiante
 );
 
 // Rutas para ESTUDIANTES

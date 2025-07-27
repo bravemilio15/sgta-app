@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { crearTarea, actualizarTarea, obtenerTarea } from '../../../api';
 import { useUser } from '../../../context/UserContext';
-import './GestionarTareaPage.css';
+import './GestionarTareasPage.css';
 
 const GestionarTareaPage = () => {
     const { id } = useParams();
@@ -40,7 +40,7 @@ const GestionarTareaPage = () => {
         } else {
             await crearTarea(tarea, user.token);
         }
-        navigate('/tareas/docente');
+        navigate('/docente/tareas');
     };
 
     return (

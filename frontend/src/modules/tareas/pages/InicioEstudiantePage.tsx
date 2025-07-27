@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useUser } from '../../../context/UserContext';
 import { obtenerDashboardEstudiante } from '../../../api';
-import TareaCard from '../../../components/TareaCard';
+import TareaCard from '../components/TareaCard';
 import './InicioEstudiantePage.css';
 
 const InicioEstudiantePage = () => {

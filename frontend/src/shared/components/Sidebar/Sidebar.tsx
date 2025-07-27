@@ -47,15 +47,13 @@ const Sidebar = () => {
         ];
       case 'docente':
         return [
-          { to: '/tareas/menu/inicio-docente', label: 'Inicio', icon: <FiHome /> },
-          { to: '/tareas', label: 'Mis Tareas', icon: <FiBarChart2 /> },
+          { to: '/docente/tareas', label: 'Mis Tareas', icon: <FiBarChart2 /> },
           { to: '/reportes', label: 'Reportes', icon: <FiBarChart2 /> },
           { to: '/notificaciones', label: 'Notificaciones', icon: <FiBell /> },
         ];
       case 'estudiante':
         return [
-          { to: '/tareas/menu/inicio-estudiante', label: 'Inicio', icon: <FiHome /> },
-          { to: '/tareas', label: 'Mis Tareas', icon: <FiBarChart2 /> },
+          { to: '/estudiante/dashboard', label: 'Mi Dashboard', icon: <FiHome /> },
           { to: '/notificaciones', label: 'Notificaciones', icon: <FiBell /> },
         ];
       default:

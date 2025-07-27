@@ -55,100 +55,7 @@ export async function obtenerUsuariosPendientes() {
 }
 const API_BASE_URL = 'http://localhost:3003/api/tareas';
 
-<<<<<<< HEAD
-// --- TAREAS ---
-
-// RF08: Obtener todas las tareas de un docente
-export const obtenerTareasDocente = async (token: string) => {
-  const response = await fetch(`${API_BASE_URL}/docente`, {
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  return response.json();
-};
-
-// RF08: Crear una nueva tarea
-export const crearTarea = async (tarea: any, token: string) => {
-  const response = await fetch(API_BASE_URL, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(tarea)
-  });
-  return response.json();
-};
-
-// RF08: Actualizar una tarea existente
-export const actualizarTarea = async (id: string, tarea: any, token: string) => {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
-    method: 'PUT',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(tarea)
-  });
-  return response.json();
-};
-
-// RF08: Eliminar una tarea
-export const eliminarTarea = async (id: string, token: string) => {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` }
-  });
-  return response.json();
-};
-
-// RF09: Asignar una tarea
-export const asignarTarea = async (id: string, asignacion: any, token: string) => {
-  const response = await fetch(`${API_BASE_URL}/${id}/asignar`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
-    },
-    body: JSON.stringify(asignacion)
-  });
-  return response.json();
-};
-
-
-// RF12: Gestionar entrega del estudiante
-export const gestionarEntrega = async (tareaId: string, formData: FormData, token: string) => {
-  const response = await fetch(`${API_BASE_URL}/${tareaId}/entregar`, {
-    method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}` },
-    body: formData
-  });
-  return response.json();
-};
-
-// RF14: Calificar una entrega
-export const calificarEntrega = async (entregaId: string, calificacion: any, token: string) => {
-    const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}/calificar`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(calificacion)
-    });
-    return response.json();
-};
-
-
-// --- ESTUDIANTE ---
-
-// RF13: Obtener dashboard del estudiante
-export const obtenerDashboardEstudiante = async (token: string) => {
-    const response = await fetch(`${API_BASE_URL}/estudiante/dashboard`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    return response.json();
-};
-=======
+<<<<<<<<< Temporary merge branch 1
 // Obtener todos los estudiantes
 export async function obtenerEstudiantes() {
   const response = await fetch(`${API_BASE}/usuarios?tipo=estudiante`);
@@ -444,4 +351,97 @@ export async function asignarNotaUnidad(matriculaId: string, tipoUnidad: 'AA' | 
   return response.json();
 }
 
->>>>>>> develop
+=========
+// --- TAREAS ---
+
+// RF08: Obtener todas las tareas de un docente
+export const obtenerTareasDocente = async (token: string) => {
+  const response = await fetch(`${API_BASE_URL}/docente`, {
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// RF08: Crear una nueva tarea
+export const crearTarea = async (tarea: any, token: string) => {
+  const response = await fetch(API_BASE_URL, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(tarea)
+  });
+  return response.json();
+};
+
+// RF08: Actualizar una tarea existente
+export const actualizarTarea = async (id: string, tarea: any, token: string) => {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(tarea)
+  });
+  return response.json();
+};
+
+// RF08: Eliminar una tarea
+export const eliminarTarea = async (id: string, token: string) => {
+  const response = await fetch(`${API_BASE_URL}/${id}`, {
+    method: 'DELETE',
+    headers: { 'Authorization': `Bearer ${token}` }
+  });
+  return response.json();
+};
+
+// RF09: Asignar una tarea
+export const asignarTarea = async (id: string, asignacion: any, token: string) => {
+  const response = await fetch(`${API_BASE_URL}/${id}/asignar`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${token}`
+    },
+    body: JSON.stringify(asignacion)
+  });
+  return response.json();
+};
+
+
+// RF12: Gestionar entrega del estudiante
+export const gestionarEntrega = async (tareaId: string, formData: FormData, token: string) => {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/entregar`, {
+    method: 'POST',
+    headers: { 'Authorization': `Bearer ${token}` },
+    body: formData
+  });
+  return response.json();
+};
+
+// RF14: Calificar una entrega
+export const calificarEntrega = async (entregaId: string, calificacion: any, token: string) => {
+    const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}/calificar`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(calificacion)
+    });
+    return response.json();
+};
+
+
+// --- ESTUDIANTE ---
+
+// RF13: Obtener dashboard del estudiante
+export const obtenerDashboardEstudiante = async (token: string) => {
+    const response = await fetch(`${API_BASE_URL}/estudiante/dashboard`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+};
+>>>>>>>>> Temporary merge branch 2
