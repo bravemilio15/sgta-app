@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import Button from '../../../../shared/components/Button';
-import Header from '../../../../shared/components/Header';
-import Footer from '../../../../shared/components/Footer';
+import UsuariosLayout from '../../UsuariosLayout';
 import './RegisterPage.css';
 import { useNavigate } from 'react-router-dom';
 import { registrarDocente } from '../../../../api';
@@ -73,10 +72,10 @@ const RegisterPageDocente = () => {
   };
 
   return (
-    <div className="register-bg">
-      <Header />
-      <main className="register-main">
-        <section className="register-card">
+    <UsuariosLayout>
+      <div className="register-bg">
+        <main className="register-main">
+          <section className="register-card">
           <h2 className="register-title">REGISTRO DOCENTE</h2>
           <form className="register-form" style={{ alignItems: 'center', justifyContent: 'center', width: '100%' }} onSubmit={handleSubmit}>
             <div style={{ width: '100%' }}>
@@ -142,8 +141,8 @@ const RegisterPageDocente = () => {
           </form>
         </section>
       </main>
-      <Footer />
     </div>
+    </UsuariosLayout>
   );
 };
 

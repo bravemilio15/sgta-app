@@ -1,8 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { solicitarRecuperacionContrasena } from '../../../../api';
-import Header from '../../../../shared/components/Header';
-import Footer from '../../../../shared/components/Footer';
+import UsuariosLayout from '../../UsuariosLayout';
 import Button from '../../../../shared/components/Button';
 import './olvidarContra.css';
 
@@ -58,10 +57,9 @@ const OlvidarContra = () => {
   };
 
   return (
-    <div className="olvidar-contrasena-container">
-      <Header />
-      
-      <main className="olvidar-contrasena-main">
+    <UsuariosLayout>
+      <div className="olvidar-contrasena-container">
+        <main className="olvidar-contrasena-main">
         <div className="olvidar-contrasena-card">
           <h1 className="olvidar-contrasena-title">RECUPERACIÓN DE CONTRASEÑA</h1>
           
@@ -115,9 +113,8 @@ const OlvidarContra = () => {
           </div>
         </div>
       </main>
-      
-      <Footer />
     </div>
+    </UsuariosLayout>
   );
 };
 

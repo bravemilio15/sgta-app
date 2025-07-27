@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cambiarContrasenaConToken } from '../../../../api';
-import Header from '../../../../shared/components/Header';
-import Footer from '../../../../shared/components/Footer';
+import UsuariosLayout from '../../UsuariosLayout';
 import Button from '../../../../shared/components/Button';
 import './olvidarContra.css';
 
@@ -87,110 +86,108 @@ const CambiarContrasena = () => {
 
   if (!token || !uid) {
     return (
-      <div className="olvidar-contrasena-container">
-        <Header />
-        <main className="olvidar-contrasena-main">
-          <div className="olvidar-contrasena-card">
-            <h1 className="olvidar-contrasena-title">ENLACE INVÁLIDO</h1>
-            <div className="olvidar-contrasena-content">
-              <p className="olvidar-contrasena-description">
-                El enlace de recuperación no es válido o ha expirado.
-              </p>
-              <div className="form-actions">
-                <Button 
-                  type="button" 
-                  className="volver-btn"
-                  onClick={handleVolver}
-                >
-                  Volver al Login
-                </Button>
+      <UsuariosLayout>
+        <div className="olvidar-contrasena-container">
+          <main className="olvidar-contrasena-main">
+            <div className="olvidar-contrasena-card">
+              <h1 className="olvidar-contrasena-title">ENLACE INVÁLIDO</h1>
+              <div className="olvidar-contrasena-content">
+                <p className="olvidar-contrasena-description">
+                  El enlace de recuperación no es válido o ha expirado.
+                </p>
+                <div className="form-actions">
+                  <Button 
+                    type="button" 
+                    className="volver-btn"
+                    onClick={handleVolver}
+                  >
+                    Volver al Login
+                  </Button>
+                </div>
               </div>
             </div>
-          </div>
-        </main>
-        <Footer />
-      </div>
+          </main>
+        </div>
+      </UsuariosLayout>
     );
   }
 
   return (
-    <div className="olvidar-contrasena-container">
-      <Header />
-      
-      <main className="olvidar-contrasena-main">
-        <div className="olvidar-contrasena-card">
-          <h1 className="olvidar-contrasena-title">CAMBIAR CONTRASEÑA</h1>
-          
-          <div className="olvidar-contrasena-content">
-            <h2 className="olvidar-contrasena-question">Establece tu nueva contraseña</h2>
+    <UsuariosLayout>
+      <div className="olvidar-contrasena-container">
+        <main className="olvidar-contrasena-main">
+          <div className="olvidar-contrasena-card">
+            <h1 className="olvidar-contrasena-title">CAMBIAR CONTRASEÑA</h1>
             
-            <p className="olvidar-contrasena-description">
-              Ingresa tu nueva contraseña. Debe tener al menos 6 caracteres.
-            </p>
-            
-            <form onSubmit={handleSubmit} className="olvidar-contrasena-form">
-              <div className="form-group">
-                <label htmlFor="nuevaContrasena" className="form-label">
-                  Nueva contraseña
-                </label>
-                <input
-                  id="nuevaContrasena"
-                  type="password"
-                  className="form-input"
-                  value={nuevaContrasena}
-                  onChange={(e) => setNuevaContrasena(e.target.value)}
-                  placeholder="Ingresa tu nueva contraseña"
-                  required
-                  minLength={6}
-                />
-              </div>
-
-              <div className="form-group">
-                <label htmlFor="confirmarContrasena" className="form-label">
-                  Confirmar contraseña
-                </label>
-                <input
-                  id="confirmarContrasena"
-                  type="password"
-                  className="form-input"
-                  value={confirmarContrasena}
-                  onChange={(e) => setConfirmarContrasena(e.target.value)}
-                  placeholder="Confirma tu nueva contraseña"
-                  required
-                  minLength={6}
-                />
-              </div>
+            <div className="olvidar-contrasena-content">
+              <h2 className="olvidar-contrasena-question">Establece tu nueva contraseña</h2>
               
-              {mensaje && (
-                <div className={`mensaje ${tipoMensaje}`}>
-                  {mensaje}
+              <p className="olvidar-contrasena-description">
+                Ingresa tu nueva contraseña. Debe tener al menos 6 caracteres.
+              </p>
+              
+              <form onSubmit={handleSubmit} className="olvidar-contrasena-form">
+                <div className="form-group">
+                  <label htmlFor="nuevaContrasena" className="form-label">
+                    Nueva contraseña
+                </label>
+                  <input
+                    id="nuevaContrasena"
+                    type="password"
+                    className="form-input"
+                    value={nuevaContrasena}
+                    onChange={(e) => setNuevaContrasena(e.target.value)}
+                    placeholder="Ingresa tu nueva contraseña"
+                    required
+                    minLength={6}
+                  />
                 </div>
-              )}
-              
-              <div className="form-actions">
-                <Button 
-                  type="submit" 
-                  className="solicitar-btn"
-                  disabled={loading}
-                >
-                  {loading ? 'Actualizando...' : 'Cambiar contraseña'}
-                </Button>
+
+                <div className="form-group">
+                  <label htmlFor="confirmarContrasena" className="form-label">
+                    Confirmar contraseña
+                  </label>
+                  <input
+                    id="confirmarContrasena"
+                    type="password"
+                    className="form-input"
+                    value={confirmarContrasena}
+                    onChange={(e) => setConfirmarContrasena(e.target.value)}
+                    placeholder="Confirma tu nueva contraseña"
+                    required
+                    minLength={6}
+                  />
+                </div>
                 
-                <Button 
-                  type="button" 
-                  className="volver-btn"
-                  onClick={handleVolver}
-                >
-                  Cancelar
-                </Button>
-              </div>
-            </form>
+                {mensaje && (
+                  <div className={`mensaje ${tipoMensaje}`}>
+                    {mensaje}
+                  </div>
+                )}
+                
+                <div className="form-actions">
+                  <Button 
+                    type="submit" 
+                    className="solicitar-btn"
+                    disabled={loading}
+                  >
+                    {loading ? 'Actualizando...' : 'Cambiar contraseña'}
+                  </Button>
+                  
+                  <Button 
+                    type="button" 
+                    className="volver-btn"
+                    onClick={handleVolver}
+                  >
+                    Cancelar
+                  </Button>
+                </div>
+              </form>
+            </div>
           </div>
-        </div>
-      </main>
-      
-      <Footer />
-    </div>
+        </main>
+      </div>
+    </UsuariosLayout>
   );
 };
 

@@ -17,7 +17,6 @@ import '../index.css';
 import InicioEstudiantePage from '../modules/tareas/menu/InicioEstudiantePage';
 import InicioDocentePage from '../modules/tareas/pages/InicioDocentePage';
 import { useUser } from '../context/UserContext';
-import { useEffect } from 'react';
 
 // Componente para rutas protegidas
 const ProtectedRoute = ({ children, allowedTypes }: { children: React.ReactNode, allowedTypes?: string[] }) => {
@@ -64,8 +63,8 @@ export default function AppRouter() {
   const { user } = useUser();
 
   return (
-    <div className="app-bg">
-      <BrowserRouter>
+    <BrowserRouter>
+      <div className="app-bg">
         {/* Solo mostrar header si el usuario está autenticado */}
         {user && <Header />}
         <main className="app-main">
@@ -171,7 +170,7 @@ export default function AppRouter() {
             <Route path="*" element={<div style={{textAlign:'center',marginTop:'2rem'}}>Página no encontrada</div>} />
           </Routes>
         </main>
-      </BrowserRouter>
-    </div>
+      </div>
+    </BrowserRouter>
   );
 }

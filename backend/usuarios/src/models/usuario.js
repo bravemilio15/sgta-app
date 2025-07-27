@@ -146,7 +146,7 @@ class Administrador extends Usuario {
     identificacion,
     tipoIdentificacion,
     fechaPerf,
-    estadoRegistro = EstadoRegistro.APROBADO, // Los administradores vienen aprobados por defecto
+    estadoRegistro = EstadoRegistro.APROBADO,
     passwordHash = null,
     passwordTemporal = null,
     nivelAcceso = 'admin' // Nivel de acceso administrativo
