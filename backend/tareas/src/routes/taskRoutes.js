@@ -1,22 +1,94 @@
 const express = require('express');
 const router = express.Router();
 const {
-  registrarTarea,
-  obtenerTareas,
-  editarTarea,
-  eliminarTarea
+  crearTareaDocente,
+  editarTareaDocente,
+  eliminarTareaDocente,
+  asignarTarea,
+  gestionarEntrega,
+  eliminarArchivoEntrega,
+  calificarEntrega,
+  obtenerDashboardEstudiante,
+  obtenerTareasDocente,
+  obtenerDetalleTarea,
+  validacionesCrearTarea
 } = require('../controllers/taskController');
+const { verificarToken, verificarRol } = require('../middleware/auth');
+const { uploadMultiple, handleMulterError } = require('../middleware/fileUpload');
 
-// Registrar una nueva tarea
-router.post('/register', registrarTarea);
+// Todas las rutas requieren autenticación
+router.use(verificarToken);
 
-// Obtener todas las tareas
-router.get('/', obtenerTareas);
+// Rutas para DOCENTES
+// RF08: Gestión de tareas
+router.post(
+  '/', 
+  verificarRol(['docente']), 
+  validacionesCrearTarea,
+  crearTareaDocente
+);
 
-// Editar una tarea existente
-router.put('/:id', editarTarea);
+router.put(
+  '/:tareaId', 
+  verificarRol(['docente']), 
+  editarTareaDocente
+);
 
-// Eliminar una tarea
-router.delete('/:id', eliminarTarea);
+router.delete(
+  '/:tareaId', 
+  verificarRol(['docente']), 
+  eliminarTareaDocente
+);
+
+// RF09: Asignación de tareas
+router.post(
+  '/:tareaId/asignar', 
+  verificarRol(['docente']), 
+  asignarTarea
+);
+
+// RF14: Calificación
+router.post(
+  '/entregas/:entregaId/calificar', 
+  verificarRol(['docente']), 
+  calificarEntrega
+);
+
+// Obtener tareas del docente
+router.get(
+  '/docente', 
+  verificarRol(['docente']), 
+  obtenerTareasDocente
+);
+
+// Obtener detalle de tarea con entregas
+router.get(
+  '/:tareaId/detalle', 
+  verificarRol(['docente']), 
+  obtenerDetalleTarea
+);
+
+// Rutas para ESTUDIANTES
+// RF12: Gestión de entregas
+router.post(
+  '/:tareaId/entregar',
+  verificarRol(['estudiante']),
+  uploadMultiple,
+  handleMulterError,
+  gestionarEntrega
+);
+
+router.delete(
+  '/:tareaId/archivo/:archivoNombre',
+  verificarRol(['estudiante']),
+  eliminarArchivoEntrega
+);
+
+// RF13: Dashboard del estudiante
+router.get(
+  '/estudiante/dashboard',
+  verificarRol(['estudiante']),
+  obtenerDashboardEstudiante
+);
 
 module.exports = router;

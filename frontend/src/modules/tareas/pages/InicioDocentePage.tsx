@@ -1,80 +1,56 @@
-import React from 'react';
-
-const tareasEjemplo = [
-  {
-    id: 1,
-    titulo: 'APE-GLC-Automatas',
-    materia: 'Procesos de software',
-    fechaEntrega: 'Lunes 30 de Junio del 2025',
-    revisada: true,
-  },
-  // ...más tareas
-];
-
-const materiasEjemplo = ['Procesos de software', 'Matemática', 'Algoritmos'];
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { obtenerTareasDocente, eliminarTarea } from '../../../api';
+import { useUser } from '../../../context/UserContext';
+import './InicioDocentePage.css';
 
 const InicioDocentePage = () => {
-  return (
-    <div className="inicio-docente-container">
-      <header className="inicio-docente-header">
-        <h1>Hola, Santiago Apolo</h1>
-        <p>Lunes 30 de Junio del 2025</p>
-        <p>Tienes 2 tareas pendientes por revisar</p>
-      </header>
+    const [tareas, setTareas] = useState([]);
+    const { user } = useUser();
+    const navigate = useNavigate();
 
-      <section className="inicio-docente-tareas">
-        <div className="inicio-docente-tareas-header">
-          <h2>Tareas</h2>
-          <div>
-            <select className="materia-filter">
-              <option value="">Filtrar por materia</option>
-              {materiasEjemplo.map(m => (
-                <option key={m} value={m}>{m}</option>
-              ))}
-            </select>
-            <button className="nueva-tarea-btn">Nueva tarea</button>
-          </div>
+    useEffect(() => {
+        const cargarTareas = async () => {
+            if (user && user.token) {
+                const tareasData = await obtenerTareasDocente(user.token);
+                setTareas(tareasData);
+            }
+        };
+        cargarTareas();
+    }, [user]);
+
+    const handleEliminar = async (id) => {
+        if (window.confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
+            await eliminarTarea(id, user.token);
+            setTareas(tareas.filter(t => t.id !== id));
+        }
+    };
+
+    return (
+        <div className="inicio-docente-container">
+            <header className="inicio-docente-header">
+                <h1>Mis Tareas</h1>
+                <button onClick={() => navigate('/tareas/nueva')} className="nueva-tarea-btn">
+                    + Nueva Tarea
+                </button>
+            </header>
+            <div className="tareas-list">
+                {tareas.map(tarea => (
+                    <div key={tarea.id} className="tarea-card">
+                        <h3>{tarea.titulo}</h3>
+                        <p><strong>Asignatura:</strong> {tarea.asignatura}</p>
+                        <p><strong>Fecha de Entrega:</strong> {new Date(tarea.fechaEntrega).toLocaleDateString()}</p>
+                        <p><strong>Tipo:</strong> {tarea.tipo}</p>
+                        <div className="tarea-actions">
+                            <button onClick={() => navigate(`/tareas/editar/${tarea.id}`)}>Editar</button>
+                            <button onClick={() => navigate(`/tareas/revisar/${tarea.id}`)}>Revisar</button>
+                            <button onClick={() => handleEliminar(tarea.id)} className="eliminar-btn">Eliminar</button>
+                        </div>
+                    </div>
+                ))}
+            </div>
         </div>
-        <table className="tareas-table">
-          <thead>
-            <tr>
-              <th>Título</th>
-              <th>Materia</th>
-              <th>Fecha de entrega</th>
-              <th>Revisada</th>
-              <th>Revisar</th>
-              <th>Acciones</th>
-            </tr>
-          </thead>
-          <tbody>
-            {tareasEjemplo.map(t => (
-              <tr key={t.id}>
-                <td>{t.titulo}</td>
-                <td>{t.materia}</td>
-                <td>{t.fechaEntrega}</td>
-                <td>
-                  <span className={t.revisada ? 'revisada-si' : 'revisada-no'}>
-                    {t.revisada ? 'Si' : 'No'}
-                  </span>
-                </td>
-                <td>
-                  <button className="revisar-btn">Revisar</button>
-                </td>
-                <td>
-                  <button className="editar-btn">✏️</button>
-                  <button className="eliminar-btn">🗑️</button>
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
-      </section>
-      <footer className="inicio-docente-footer">
-        <span>Teléfono: XXXXXXXXXX</span>
-        <span>Correo electrónico: Ayuda@unl.edu.ec</span>
-      </footer>
-    </div>
-  );
+    );
 };
 
 export default InicioDocentePage;

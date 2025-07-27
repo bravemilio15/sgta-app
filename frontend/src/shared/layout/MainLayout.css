@@ -1,0 +1,12 @@
+.main-layout {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh;
+  width: 100vw;
+  background-color: #f0f2f5; /* Un color de fondo suave */
+}
+
+.main-content {
+  flex: 1; /* Hace que el contenido principal ocupe el espacio disponible */
+  padding: 1.5rem;
+}

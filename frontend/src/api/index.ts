@@ -53,6 +53,7 @@ export async function obtenerUsuariosPendientes() {
   const response = await fetch(`${API_BASE}/usuarios?estado=Pendiente`);
   return response.json();
 }
+const API_BASE_URL = 'http://localhost:3003/api/tareas';
 
 // Obtener todos los estudiantes
 export async function obtenerEstudiantes() {
