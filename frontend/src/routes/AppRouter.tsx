@@ -15,16 +15,13 @@ import CambiarContrasena from '../modules/usuarios/pages/OlvidarContrasena/Cambi
 import Header from '../shared/components/Header';
 import Layout from '../shared/components/Layout/Layout';
 import AdminLayout from '../shared/components/Layout/AdminLayout';
-import { UsuariosPage, RegisterPage } from '../modules/usuarios';
 import InicioDocentePage from '../modules/tareas/pages/InicioDocentePage';
-import GestionarTareaPage from '../modules/tareas/pages/GestionarTareaPage';
-import RevisarTareaPage from '../modules/tareas/pages/RevisarTareaPage';
+import GestionarTareasPage from '../modules/tareas/pages/GestionarTareasPage';
+import RevisarTareasPage from '../modules/tareas/pages/RevisarTareasPage';
 import InicioEstudiantePage from '../modules/tareas/pages/InicioEstudiantePage';
 import TareaEstudiantePage from '../modules/tareas/pages/TareaEstudiantePage';
-import MainLayout from '../shared/layout/MainLayout';
+import MainLayout from '../shared/layout/MainLayaout';
 import '../index.css';
-import InicioEstudiantePage from '../modules/tareas/menu/InicioEstudiantePage';
-import InicioDocentePage from '../modules/tareas/pages/InicioDocentePage';
 import { useUser } from '../context/UserContext';
 
 // Componente para rutas protegidas
@@ -180,32 +177,61 @@ export default function AppRouter() {
               </ProtectedRoute>
             } />
             
+            {/* Rutas adicionales para tareas */}
+            <Route path="/docente/tareas" element={
+              <ProtectedRoute allowedTypes={['docente']}>
+                <Layout><InicioDocentePage /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/docente/tareas/nueva" element={
+              <ProtectedRoute allowedTypes={['docente']}>
+                <Layout><GestionarTareasPage /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/docente/tareas/editar/:id" element={
+              <ProtectedRoute allowedTypes={['docente']}>
+                <Layout><GestionarTareasPage /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/docente/tareas/revisar/:id" element={
+              <ProtectedRoute allowedTypes={['docente']}>
+                <Layout><RevisarTareasPage /></Layout>
+              </ProtectedRoute>
+            } />
+            
+            <Route path="/estudiante/dashboard" element={
+              <ProtectedRoute allowedTypes={['estudiante']}>
+                <Layout><InicioEstudiantePage /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/estudiante/tarea/:id" element={
+              <ProtectedRoute allowedTypes={['estudiante']}>
+                <Layout><TareaEstudiantePage /></Layout>
+              </ProtectedRoute>
+            } />
+            
+            {/* Rutas alternativas para compatibilidad */}
+            <Route path="/tareas/nueva" element={
+              <ProtectedRoute allowedTypes={['docente']}>
+                <Layout><GestionarTareasPage /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/tareas/editar/:id" element={
+              <ProtectedRoute allowedTypes={['docente']}>
+                <Layout><GestionarTareasPage /></Layout>
+              </ProtectedRoute>
+            } />
+            <Route path="/tareas/revisar/:id" element={
+              <ProtectedRoute allowedTypes={['docente']}>
+                <Layout><RevisarTareasPage /></Layout>
+              </ProtectedRoute>
+            } />
+            
             {/* Ruta 404 */}
             <Route path="*" element={<div style={{textAlign:'center',marginTop:'2rem'}}>Página no encontrada</div>} />
           </Routes>
         </main>
       </div>
-    </BrowserRouter>
-    <BrowserRouter>
-      <Routes>
-        <Route path="/" element={<MainLayout />}>
-          <Route index element={<Navigate to="/login" replace />} />
-          <Route path="login" element={<UsuariosPage />} />
-          <Route path="registro" element={<RegisterPage />} />
-          
-          {/* Rutas de Docente */}
-          <Route path="docente/tareas" element={<InicioDocentePage />} />
-          <Route path="docente/tareas/nueva" element={<GestionarTareaPage />} />
-          <Route path="docente/tareas/editar/:id" element={<GestionarTareaPage />} />
-          <Route path="docente/tareas/revisar/:id" element={<RevisarTareaPage />} />
-
-          {/* Rutas de Estudiante */}
-          <Route path="estudiante/dashboard" element={<InicioEstudiantePage />} />
-          <Route path="estudiante/tarea/:id" element={<TareaEstudiantePage />} />
-
-          <Route path="*" element={<div>Página no encontrada</div>} />
-        </Route>
-      </Routes>
     </BrowserRouter>
   );
 }

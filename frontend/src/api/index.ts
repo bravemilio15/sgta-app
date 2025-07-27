@@ -350,3 +350,170 @@ export async function asignarNotaUnidad(matriculaId: string, tipoUnidad: 'AA' | 
   return response.json();
 }
 
+// Tareas
+export async function obtenerTareasDocente(token: string) {
+  const response = await fetch(`${API_BASE_URL}/docente`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function eliminarTarea(tareaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function crearTarea(datos: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function actualizarTarea(tareaId: string, datos: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function obtenerTarea(tareaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function obtenerDashboardEstudiante(token: string) {
+  const response = await fetch(`${API_BASE_URL}/estudiante/dashboard`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+// Entregas y calificaciones
+export async function calificarEntrega(entregaId: string, calificacion: number, comentarios: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}/calificar`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify({ calificacion, comentarios })
+  });
+  return response.json();
+}
+
+export async function obtenerEntregasTarea(tareaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/entregas`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function entregarTarea(tareaId: string, datos: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/entregar`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function obtenerEntrega(entregaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function actualizarEntrega(entregaId: string, datos: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function eliminarEntrega(entregaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+// Funciones adicionales faltantes
+export async function gestionarEntrega(tareaId: string, datos: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/entregar`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function obtenerEntregaPorEstudianteTarea(tareaId: string, estudianteId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/entregas/estudiante/${estudianteId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function obtenerDetalleTarea(tareaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/detalle`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+

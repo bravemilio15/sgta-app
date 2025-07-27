@@ -643,6 +643,120 @@ async function obtenerDetalleTarea(req, res) {
   }
 }
 
+// Obtener una tarea específica
+async function obtenerTareaEspecifica(req, res) {
+  try {
+    const { tareaId } = req.params;
+    const tarea = await obtenerTarea(tareaId);
+    
+    if (!tarea) {
+      return res.status(404).json({ error: 'Tarea no encontrada' });
+    }
+
+    // Verificar permisos
+    if (req.usuario.tipo === 'docente' && tarea.docenteId !== req.usuario.uid) {
+      return res.status(403).json({ error: 'No tienes permisos para ver esta tarea' });
+    }
+
+    res.json(tarea);
+  } catch (error) {
+    console.error('Error al obtener tarea:', error);
+    res.status(500).json({ error: 'Error al obtener la tarea' });
+  }
+}
+
+// Obtener entregas de una tarea
+async function obtenerEntregasTarea(req, res) {
+  try {
+    const { tareaId } = req.params;
+    
+    // Verificar que la tarea existe y pertenece al docente
+    const tarea = await obtenerTarea(tareaId);
+    if (!tarea) {
+      return res.status(404).json({ error: 'Tarea no encontrada' });
+    }
+    
+    if (tarea.docenteId !== req.usuario.uid) {
+      return res.status(403).json({ error: 'No tienes permisos para ver las entregas de esta tarea' });
+    }
+
+    const entregas = await obtenerEntregasPorTarea(tareaId);
+    res.json(entregas);
+  } catch (error) {
+    console.error('Error al obtener entregas:', error);
+    res.status(500).json({ error: 'Error al obtener las entregas' });
+  }
+}
+
+// Obtener entrega específica
+async function obtenerEntregaEspecifica(req, res) {
+  try {
+    const { entregaId } = req.params;
+    const entrega = await obtenerEntrega(entregaId);
+    
+    if (!entrega) {
+      return res.status(404).json({ error: 'Entrega no encontrada' });
+    }
+
+    // Verificar permisos
+    if (req.usuario.tipo === 'estudiante' && entrega.estudianteId !== req.usuario.uid) {
+      return res.status(403).json({ error: 'No tienes permisos para ver esta entrega' });
+    }
+
+    res.json(entrega);
+  } catch (error) {
+    console.error('Error al obtener entrega:', error);
+    res.status(500).json({ error: 'Error al obtener la entrega' });
+  }
+}
+
+// Actualizar entrega
+async function actualizarEntregaEstudiante(req, res) {
+  try {
+    const { entregaId } = req.params;
+    const actualizaciones = req.body;
+
+    // Verificar que la entrega existe y pertenece al estudiante
+    const entrega = await obtenerEntrega(entregaId);
+    if (!entrega) {
+      return res.status(404).json({ error: 'Entrega no encontrada' });
+    }
+
+    if (entrega.estudianteId !== req.usuario.uid) {
+      return res.status(403).json({ error: 'No tienes permisos para actualizar esta entrega' });
+    }
+
+    const entregaActualizada = await actualizarEntrega(entregaId, actualizaciones);
+    res.json(entregaActualizada);
+  } catch (error) {
+    console.error('Error al actualizar entrega:', error);
+    res.status(500).json({ error: 'Error al actualizar la entrega' });
+  }
+}
+
+// Eliminar entrega
+async function eliminarEntregaEstudiante(req, res) {
+  try {
+    const { entregaId } = req.params;
+
+    // Verificar que la entrega existe y pertenece al estudiante
+    const entrega = await obtenerEntrega(entregaId);
+    if (!entrega) {
+      return res.status(404).json({ error: 'Entrega no encontrada' });
+    }
+
+    if (entrega.estudianteId !== req.usuario.uid) {
+      return res.status(403).json({ error: 'No tienes permisos para eliminar esta entrega' });
+    }
+
+    await eliminarEntrega(entregaId);
+    res.json({ message: 'Entrega eliminada exitosamente' });
+  } catch (error) {
+    console.error('Error al eliminar entrega:', error);
+    res.status(500).json({ error: 'Error al eliminar la entrega' });
+  }
+}
+
 module.exports = {
   crearTareaDocente,
   editarTareaDocente,
@@ -654,5 +768,10 @@ module.exports = {
   obtenerDashboardEstudiante,
   obtenerTareasDocente,
   obtenerDetalleTarea,
+  obtenerTareaEspecifica,
+  obtenerEntregasTarea,
+  obtenerEntregaEspecifica,
+  actualizarEntregaEstudiante,
+  eliminarEntregaEstudiante,
   validacionesCrearTarea
 };

@@ -30,7 +30,7 @@ const InicioDocentePage = () => {
         <div className="inicio-docente-container">
             <header className="inicio-docente-header">
                 <h1>Mis Tareas</h1>
-                <button onClick={() => navigate('/tareas/nueva')} className="nueva-tarea-btn">
+                <button onClick={() => navigate('/docente/tareas/nueva')} className="nueva-tarea-btn">
                     + Nueva Tarea
                 </button>
             </header>
@@ -42,8 +42,8 @@ const InicioDocentePage = () => {
                         <p><strong>Fecha de Entrega:</strong> {new Date(tarea.fechaEntrega).toLocaleDateString()}</p>
                         <p><strong>Tipo:</strong> {tarea.tipo}</p>
                         <div className="tarea-actions">
-                            <button onClick={() => navigate(`/tareas/editar/${tarea.id}`)}>Editar</button>
-                            <button onClick={() => navigate(`/tareas/revisar/${tarea.id}`)}>Revisar</button>
+                            <button onClick={() => navigate(`/docente/tareas/editar/${tarea.id}`)}>Editar</button>
+                            <button onClick={() => navigate(`/docente/tareas/revisar/${tarea.id}`)}>Revisar</button>
                             <button onClick={() => handleEliminar(tarea.id)} className="eliminar-btn">Eliminar</button>
                         </div>
                     </div>

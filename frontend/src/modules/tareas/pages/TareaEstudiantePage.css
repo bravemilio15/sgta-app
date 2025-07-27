@@ -1,7 +1,9 @@
 .tarea-estudiante-container {
     padding: 2rem;
-    max-width: 800px;
+    max-width: 1000px;
     margin: auto;
+    margin-left: 300px;
+    margin-right: 20px;
     background: #fff;
     border-radius: 8px;
 }
