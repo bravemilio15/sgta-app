@@ -1,36 +1,35 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { UsuariosPage } from '../modules/usuarios';
-import { TareasPage } from '../modules/tareas';
-import { ReportesPage } from '../modules/reportes';
-import { NotificacionesPage } from '../modules/notificaciones';
-import { RegisterPage } from '../modules/usuarios';
-import PanelAdminPage from '../modules/usuarios/pages/PanelAdmin/PanelAdminPage';
-import Header from '../shared/components/Header';
-import Footer from '../shared/components/Footer';
+import { UsuariosPage, RegisterPage } from '../modules/usuarios';
+import InicioDocentePage from '../modules/tareas/pages/InicioDocentePage';
+import GestionarTareaPage from '../modules/tareas/pages/GestionarTareaPage';
+import RevisarTareaPage from '../modules/tareas/pages/RevisarTareaPage';
+import InicioEstudiantePage from '../modules/tareas/pages/InicioEstudiantePage';
+import TareaEstudiantePage from '../modules/tareas/pages/TareaEstudiantePage';
+import MainLayout from '../shared/layout/MainLayout';
 import '../index.css';
-import InicioEstudiantePage from '../modules/tareas/menu/InicioEstudiantePage';
-import { InicioDocentePage } from '../modules/tareas/pages/InicioDocentePage';
 
 export default function AppRouter() {
   return (
-    <div className="app-bg">
-      <Header />
-      <main className="app-main">
-        <BrowserRouter>
-          <Routes>
-            <Route path="/" element={<Navigate to="/usuarios" replace />} />
-            <Route path="/usuarios" element={<UsuariosPage />} />
-            <Route path="/usuarios/registro" element={<RegisterPage />} />
-            <Route path="/tareas" element={<TareasPage />} />
-            <Route path="/reportes" element={<ReportesPage />} />
-            <Route path="/notificaciones" element={<NotificacionesPage />} />
-            <Route path="/panel-admin" element={<PanelAdminPage />} />
-            <Route path="/tareas/menu/inicio-estudiante" element={<InicioEstudiantePage />} />
-            <Route path="/tareas/menu/inicio-docente" element={<InicioDocentePage />} />            <Route path="*" element={<div style={{textAlign:'center',marginTop:'2rem'}}>Página no encontrada</div>} />
-          </Routes>
-        </BrowserRouter>
-      </main>
-      <Footer />
-    </div>
+    <BrowserRouter>
+      <Routes>
+        <Route path="/" element={<MainLayout />}>
+          <Route index element={<Navigate to="/login" replace />} />
+          <Route path="login" element={<UsuariosPage />} />
+          <Route path="registro" element={<RegisterPage />} />
+          
+          {/* Rutas de Docente */}
+          <Route path="docente/tareas" element={<InicioDocentePage />} />
+          <Route path="docente/tareas/nueva" element={<GestionarTareaPage />} />
+          <Route path="docente/tareas/editar/:id" element={<GestionarTareaPage />} />
+          <Route path="docente/tareas/revisar/:id" element={<RevisarTareaPage />} />
+
+          {/* Rutas de Estudiante */}
+          <Route path="estudiante/dashboard" element={<InicioEstudiantePage />} />
+          <Route path="estudiante/tarea/:id" element={<TareaEstudiantePage />} />
+
+          <Route path="*" element={<div>Página no encontrada</div>} />
+        </Route>
+      </Routes>
+    </BrowserRouter>
   );
 }
