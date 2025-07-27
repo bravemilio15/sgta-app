@@ -1,11 +1,12 @@
+
 // Enumeración para el tipo de tarea
 const TiposTarea = {
-  APE: 'APE',
-  AA: 'AA',
-  ACD: 'ACD'
+  ACD: 'Actividad de contacto con docente',
+  APE: 'Aprendizaje práctico experimental',
+  AA: 'Aprendizaje autónomo'
 };
 
-// Clase Tarea según el modelo UML
+// Clase Tarea según los requerimientos
 class Tarea {
   constructor({
     id,
@@ -14,25 +15,31 @@ class Tarea {
     fechaInicio,
     fechaEntrega,
     tipo,
-    permiteEntregaTardia,
-    diasPermitidosEntregaTardia,
-    porcentajePenalizacionEntregaTardia,
-    esGrupal
+    asignatura,
+    docenteId,
+    permiteEntregaTardia = false,
+    diasPermitidosEntregaTardia = 0,
+    porcentajePenalizacion = 50,
+    archivosPermitidos = ['pdf', 'xlsx', 'docx'],
+    tamanioMaximoMB = 10,
+    estado = 'activa',
+    fechaCreacion = new Date().toISOString()
   }) {
     this.id = id;
     this.titulo = titulo;
     this.descripcion = descripcion;
     this.fechaInicio = fechaInicio;
     this.fechaEntrega = fechaEntrega;
-    this.tipo = tipo; // Debe ser uno de TiposTarea
+    this.tipo = tipo;
+    this.asignatura = asignatura;
+    this.docenteId = docenteId;
     this.permiteEntregaTardia = permiteEntregaTardia;
     this.diasPermitidosEntregaTardia = diasPermitidosEntregaTardia;
-    this.porcentajePenalizacionEntregaTardia = porcentajePenalizacionEntregaTardia;
-    this.esGrupal = esGrupal;
-  }
-
-  configurarEntregaTardia(permitir) {
-    this.permiteEntregaTardia = permitir;
+    this.porcentajePenalizacion = porcentajePenalizacion;
+    this.archivosPermitidos = archivosPermitidos;
+    this.tamanioMaximoMB = tamanioMaximoMB;
+    this.estado = estado;
+    this.fechaCreacion = fechaCreacion;
   }
 }
 
