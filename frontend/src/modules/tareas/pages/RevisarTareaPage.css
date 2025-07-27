@@ -1,0 +1,75 @@
+.revisar-tarea-container {
+    padding: 2rem;
+    max-width: 900px;
+    margin: auto;
+}
+
+.revisar-tarea-container h1 {
+    color: #1a3fa6;
+}
+
+.volver-btn {
+    background: #6c757d;
+    color: white;
+    border: none;
+    padding: 0.5rem 1rem;
+    border-radius: 5px;
+    cursor: pointer;
+    margin-bottom: 1rem;
+}
+
+.entregas-lista {
+    margin-top: 2rem;
+    display: flex;
+    flex-direction: column;
+    gap: 1.5rem;
+}
+
+.entrega-card {
+    background: #fff;
+    padding: 1.5rem;
+    border-radius: 8px;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+}
+
+.entrega-info h4 {
+    margin: 0 0 0.5rem 0;
+}
+
+.archivos-entregados a {
+    display: block;
+    margin-top: 0.5rem;
+    color: #007bff;
+    text-decoration: none;
+}
+
+.calificacion-form {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    min-width: 200px;
+}
+
+.calificacion-form input,
+.calificacion-form textarea {
+    padding: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+}
+
+.calificacion-form textarea {
+    min-height: 80px;
+    resize: vertical;
+}
+
+.calificacion-form button {
+    background: #28a745;
+    color: white;
+    border: none;
+    padding: 0.6rem;
+    border-radius: 5px;
+    cursor: pointer;
+}

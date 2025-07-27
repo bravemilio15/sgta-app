@@ -40,6 +40,22 @@ export const obtenerTareasDocente = async (token: string) => {
   return response.json();
 };
 
+// Obtener una tarea específica por ID
+export const obtenerTarea = async (id: string, token: string) => {
+    const response = await fetch(`${API_BASE_URL}/${id}`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+};
+
+// Obtener detalles de la tarea con las entregas (para revisar)
+export const obtenerDetalleTarea = async (id: string, token: string) => {
+    const response = await fetch(`${API_BASE_URL}/${id}/detalle`, {
+        headers: { 'Authorization': `Bearer ${token}` }
+    });
+    return response.json();
+};
+
 // RF08: Crear una nueva tarea
 export const crearTarea = async (tarea: any, token: string) => {
   const response = await fetch(API_BASE_URL, {

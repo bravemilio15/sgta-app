@@ -1,0 +1,15 @@
+.inicio-estudiante-container {
+    max-width: 1000px;
+    margin: 1rem auto;
+    padding: 1rem;
+}
+
+.inicio-estudiante-container h1,
+.inicio-estudiante-container h2 {
+    color: #333;
+}
+
+.tareas-pendientes,
+.tareas-calificadas {
+    margin-top: 2rem;
+}
