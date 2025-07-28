@@ -183,17 +183,82 @@
 .materias-list {
   display: flex;
   flex-wrap: wrap;
-  gap: 0.3rem;
+  gap: 0.5rem;
 }
 
 .materia-tag {
   background: #e3f2fd;
   color: #1976d2;
-  padding: 0.2rem 0.5rem;
-  border-radius: 12px;
-  font-size: 0.7rem;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
   font-weight: 500;
-  border: 1px solid #bbdefb;
+}
+
+.asignaturas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.asignaturas-info {
+  display: flex;
+  flex-direction: column;
+  gap: 0.25rem;
+}
+
+.asignaturas-count {
+  font-size: 0.8rem;
+  color: #28a745;
+  font-weight: 600;
+}
+
+.asignaturas-details {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  max-width: 300px;
+}
+
+.asignatura-tag {
+  background: #e8f5e8;
+  color: #2e7d32;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+}
+
+.no-asignaturas {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.9rem;
+}
+
+.titulos-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.titulo-tag {
+  background: #fff3e0;
+  color: #f57c00;
+  padding: 0.25rem 0.5rem;
+  border-radius: 4px;
+  font-size: 0.8rem;
+  font-weight: 500;
+}
+
+.no-titulos {
+  color: #6c757d;
+  font-style: italic;
+  font-size: 0.9rem;
 }
 
 .acciones-cell {

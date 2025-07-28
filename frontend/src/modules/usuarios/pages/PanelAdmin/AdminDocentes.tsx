@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useUser } from '../../../../context/UserContext';
 import AdminLayout from '../../../../shared/components/Layout/AdminLayout';
 import Button from '../../../../shared/components/Button';
-import { obtenerDocentes, aprobarUsuario } from '../../../../api';
+import { obtenerDocentesConAsignaturas, obtenerAsignaturas, aprobarUsuario } from '../../../../api';
 import './AdminDocentes.css';
 
 interface Docente {
@@ -13,14 +13,22 @@ interface Docente {
   identificacion: string;
   estado: 'pendiente' | 'aprobado';
   estadoRegistro: string;
-  materias: string[];
+  asignaturasUid?: string[];
   titulos: string[];
   fechaPerf: string;
+}
+
+interface Asignatura {
+  id: string;
+  codigo: string;
+  nombre: string;
+  carrera: string;
 }
 
 const AdminDocentes = () => {
   const { user, loading } = useUser();
   const [docentes, setDocentes] = useState<Docente[]>([]);
+  const [asignaturas, setAsignaturas] = useState<Asignatura[]>([]);
   const [cargando, setCargando] = useState(true);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [docenteEditando, setDocenteEditando] = useState<Docente | null>(null);
@@ -32,25 +40,52 @@ const AdminDocentes = () => {
     correoPersonal: '',
     correoInstitucional: '',
     identificacion: '',
-    materias: '',
     titulos: '',
   });
 
   useEffect(() => {
-    cargarDocentes();
+    cargarDatos();
   }, []);
 
-  const cargarDocentes = async () => {
+  const cargarDatos = async () => {
     try {
-      const datos = await obtenerDocentes();
+      setCargando(true);
+      // Cargar docentes y asignaturas en paralelo
+      const [docentesData, asignaturasData] = await Promise.all([
+        obtenerDocentesConAsignaturas(),
+        obtenerAsignaturas()
+      ]);
+      
+      console.log('Docentes cargados:', docentesData);
+      console.log('Asignaturas cargadas:', asignaturasData);
+      
       // Asegurar que datos sea un array
-      const docentesArray = Array.isArray(datos) ? datos : [];
+      const docentesArray = Array.isArray(docentesData) ? docentesData : [];
+      const asignaturasArray = Array.isArray(asignaturasData) ? asignaturasData : [];
+      
       setDocentes(docentesArray);
+      setAsignaturas(asignaturasArray);
       setCargando(false);
     } catch (error) {
-      console.error('Error cargando docentes:', error);
-      setDocentes([]); // Inicializar como array vacío en caso de error
+      console.error('Error cargando datos:', error);
+      setDocentes([]);
+      setAsignaturas([]);
       setCargando(false);
+    }
+  };
+
+  const obtenerNombreAsignatura = (asignaturaId: string) => {
+    console.log('Buscando asignatura con ID:', asignaturaId);
+    console.log('Asignaturas disponibles:', asignaturas);
+    
+    const asignatura = asignaturas.find(a => a.id === asignaturaId);
+    console.log('Asignatura encontrada:', asignatura);
+    
+    if (asignatura) {
+      return `${asignatura.codigo} - ${asignatura.nombre}`;
+    } else {
+      // Temporalmente mostrar el ID para debuggear
+      return `ID: ${asignaturaId} (no encontrada)`;
     }
   };
 
@@ -61,7 +96,6 @@ const AdminDocentes = () => {
       correoPersonal: '',
       correoInstitucional: '',
       identificacion: '',
-      materias: '',
       titulos: '',
     });
     setMostrarFormulario(true);
@@ -74,7 +108,6 @@ const AdminDocentes = () => {
       correoPersonal: docente.correoPersonal,
       correoInstitucional: docente.correoInstitucional,
       identificacion: docente.identificacion,
-      materias: Array.isArray(docente.materias) ? docente.materias.join(', ') : '',
       titulos: Array.isArray(docente.titulos) ? docente.titulos.join(', ') : '',
     });
     setMostrarFormulario(true);
@@ -90,7 +123,6 @@ const AdminDocentes = () => {
           ? { 
               ...doc, 
               ...formData,
-              materias: formData.materias.split(',').map(m => m.trim()).filter(Boolean),
               titulos: formData.titulos.split(',').map(t => t.trim()).filter(Boolean)
             }
           : doc
@@ -102,7 +134,7 @@ const AdminDocentes = () => {
         ...formData,
         estado: 'pendiente',
         estadoRegistro: 'Pendiente',
-        materias: formData.materias.split(',').map(m => m.trim()).filter(Boolean),
+        asignaturasUid: [],
         titulos: formData.titulos.split(',').map(t => t.trim()).filter(Boolean),
         fechaPerf: new Date().toISOString(),
       };
@@ -200,7 +232,7 @@ const AdminDocentes = () => {
                 <th>Correo Personal</th>
                 <th>Correo Institucional</th>
                 <th>Identificación</th>
-                <th>Materias</th>
+                <th>Asignaturas</th>
                 <th>Títulos</th>
                 <th>Estado</th>
                 <th>Acciones</th>
@@ -214,17 +246,34 @@ const AdminDocentes = () => {
                   <td>{docente.correoInstitucional}</td>
                   <td>{docente.identificacion}</td>
                   <td>
-                    <div className="materias-list">
-                      {Array.isArray(docente.materias) ? docente.materias.map((materia, index) => (
-                        <span key={index} className="materia-tag">{materia}</span>
-                      )) : 'No especificadas'}
+                    <div className="asignaturas-list">
+                      {docente.asignaturasUid && docente.asignaturasUid.length > 0 ? (
+                        <div className="asignaturas-info">
+                          <span className="asignaturas-count">
+                            {docente.asignaturasUid.length} asignatura(s)
+                          </span>
+                          <div className="asignaturas-details">
+                            {docente.asignaturasUid.map((asignaturaId, index) => (
+                              <span key={index} className="asignatura-tag">
+                                {obtenerNombreAsignatura(asignaturaId)}
+                              </span>
+                            ))}
+                          </div>
+                        </div>
+                      ) : (
+                        <span className="no-asignaturas">Sin asignaturas</span>
+                      )}
                     </div>
                   </td>
                   <td>
-                    <div className="materias-list">
-                      {Array.isArray(docente.titulos) ? docente.titulos.map((titulo, index) => (
-                        <span key={index} className="materia-tag">{titulo}</span>
-                      )) : 'No especificados'}
+                    <div className="titulos-list">
+                      {Array.isArray(docente.titulos) && docente.titulos.length > 0 ? (
+                        docente.titulos.map((titulo, index) => (
+                          <span key={index} className="titulo-tag">{titulo}</span>
+                        ))
+                      ) : (
+                        <span className="no-titulos">No especificados</span>
+                      )}
                     </div>
                   </td>
                   <td>
@@ -308,16 +357,6 @@ const AdminDocentes = () => {
                     value={formData.identificacion}
                     onChange={(e) => setFormData({...formData, identificacion: e.target.value})}
                     required
-                  />
-                </div>
-                
-                <div className="form-group">
-                  <label htmlFor="materias">Materias (separadas por comas):</label>
-                  <textarea
-                    id="materias"
-                    value={formData.materias}
-                    onChange={(e) => setFormData({...formData, materias: e.target.value})}
-                    placeholder="Ej: Programación I, Base de Datos, Algoritmos"
                   />
                 </div>
                 

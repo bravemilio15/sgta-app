@@ -6,9 +6,12 @@ import {
   editarAsignatura, 
   eliminarAsignatura,
   obtenerDocentes,
-  asignarDocenteAAsignatura
+  asignarDocenteAAsignatura,
+  removerDocenteDeAsignatura,
+  obtenerDocentesDisponibles,
+  obtenerDocentesConAsignaturas
 } from '../../../../api';
-import { FiPlus, FiEdit, FiTrash2, FiBook, FiUser, FiUsers } from 'react-icons/fi';
+import { FiPlus, FiEdit, FiTrash2, FiBook, FiUser, FiUsers, FiX, FiInfo } from 'react-icons/fi';
 import './AdminAsignaturas.css';
 
 interface Asignatura {
@@ -23,11 +26,13 @@ interface Asignatura {
 interface Docente {
   uid: string;
   nombreCompleto: string;
+  asignaturasUid?: string[];
 }
 
 const AdminAsignaturas: React.FC = () => {
   const [asignaturas, setAsignaturas] = useState<Asignatura[]>([]);
   const [docentes, setDocentes] = useState<Docente[]>([]);
+  const [docentesDisponibles, setDocentesDisponibles] = useState<Docente[]>([]);
   const [cargando, setCargando] = useState(true);
   const [mostrarModal, setMostrarModal] = useState(false);
   const [modoEdicion, setModoEdicion] = useState(false);
@@ -48,12 +53,14 @@ const AdminAsignaturas: React.FC = () => {
   const cargarDatos = async () => {
     try {
       setCargando(true);
-      const [asignaturasData, docentesData] = await Promise.all([
+      const [asignaturasData, docentesData, docentesDisponiblesData] = await Promise.all([
         obtenerAsignaturas(),
-        obtenerDocentes()
+        obtenerDocentesConAsignaturas(),
+        obtenerDocentesDisponibles(5)
       ]);
       setAsignaturas(asignaturasData);
       setDocentes(docentesData);
+      setDocentesDisponibles(docentesDisponiblesData);
     } catch (error) {
       console.error('Error al cargar datos:', error);
     } finally {
@@ -150,6 +157,18 @@ const AdminAsignaturas: React.FC = () => {
     }
   };
 
+  const handleRemoverDocente = async (asignaturaId: string) => {
+    if (window.confirm('¿Está seguro de que desea remover el docente de esta asignatura?')) {
+      try {
+        await removerDocenteDeAsignatura(asignaturaId);
+        await cargarDatos();
+      } catch (error) {
+        console.error('Error al remover docente:', error);
+        alert('Error al remover el docente');
+      }
+    }
+  };
+
   const handleEliminar = async (id: string) => {
     if (window.confirm('¿Está seguro de que desea eliminar esta asignatura?')) {
       try {
@@ -166,6 +185,11 @@ const AdminAsignaturas: React.FC = () => {
     if (!docenteUid) return 'Sin docente asignado';
     const docente = docentes.find(d => d.uid === docenteUid);
     return docente ? docente.nombreCompleto : 'Docente no encontrado';
+  };
+
+  const obtenerNumeroAsignaturasDocente = (docenteUid: string) => {
+    const docente = docentes.find(d => d.uid === docenteUid);
+    return docente?.asignaturasUid?.length || 0;
   };
 
   if (cargando) {
@@ -242,25 +266,39 @@ const AdminAsignaturas: React.FC = () => {
                     <h4 className="asignatura-card-nombre">{asignatura.nombre}</h4>
                     <p className="asignatura-card-carrera">{asignatura.carrera}</p>
                     
-                                         <div className="asignatura-card-info">
-                       <div className="asignatura-card-docente">
-                         <FiUser />
-                         <span>{obtenerNombreDocente(asignatura.docenteUid)}</span>
-                       </div>
-                       <div className="asignatura-card-estudiantes">
-                         <FiUsers />
-                         <span>{asignatura.estudiantesUid.length} estudiantes</span>
-                       </div>
-                       {!asignatura.docenteUid && (
-                         <button
-                           className="asignatura-card-btn-asignar"
-                           onClick={() => abrirModalAsignarDocente(asignatura)}
-                           title="Asignar docente"
-                         >
-                           Asignar Docente
-                         </button>
-                       )}
-                     </div>
+                    <div className="asignatura-card-info">
+                      <div className="asignatura-card-docente">
+                        <FiUser />
+                        <span>{obtenerNombreDocente(asignatura.docenteUid)}</span>
+                        {asignatura.docenteUid && (
+                          <span className="asignatura-card-docente-info">
+                            ({obtenerNumeroAsignaturasDocente(asignatura.docenteUid)} asignaturas)
+                          </span>
+                        )}
+                      </div>
+                      <div className="asignatura-card-estudiantes">
+                        <FiUsers />
+                        <span>{asignatura.estudiantesUid.length} estudiantes</span>
+                      </div>
+                      
+                      {!asignatura.docenteUid ? (
+                        <button
+                          className="asignatura-card-btn-asignar"
+                          onClick={() => abrirModalAsignarDocente(asignatura)}
+                          title="Asignar docente"
+                        >
+                          Asignar Docente
+                        </button>
+                      ) : (
+                        <button
+                          className="asignatura-card-btn-remover"
+                          onClick={() => handleRemoverDocente(asignatura.id)}
+                          title="Remover docente"
+                        >
+                          <FiX /> Remover Docente
+                        </button>
+                      )}
+                    </div>
                   </div>
                 </div>
               ))}
@@ -310,9 +348,9 @@ const AdminAsignaturas: React.FC = () => {
                     onChange={(e) => setFormData({...formData, docenteUid: e.target.value})}
                   >
                     <option value="">Sin docente asignado</option>
-                    {docentes.map((docente) => (
+                    {docentesDisponibles.map((docente) => (
                       <option key={docente.uid} value={docente.uid}>
-                        {docente.nombreCompleto}
+                        {docente.nombreCompleto} ({docente.asignaturasUid?.length || 0} asignaturas)
                       </option>
                     ))}
                   </select>
@@ -329,8 +367,7 @@ const AdminAsignaturas: React.FC = () => {
               </form>
             </div>
           </div>
-                  )}
-        </div>
+        )}
 
         {/* Modal para asignar docente */}
         {mostrarModalAsignarDocente && (
@@ -358,12 +395,15 @@ const AdminAsignaturas: React.FC = () => {
                     required
                   >
                     <option value="">Seleccionar docente</option>
-                    {docentes.map((docente) => (
+                    {docentesDisponibles.map((docente) => (
                       <option key={docente.uid} value={docente.uid}>
-                        {docente.nombreCompleto}
+                        {docente.nombreCompleto} ({docente.asignaturasUid?.length || 0} asignaturas)
                       </option>
                     ))}
                   </select>
+                  <small className="form-help">
+                    <FiInfo /> Solo se muestran docentes con menos de 5 asignaturas
+                  </small>
                 </div>
                 
                 <div className="modal-actions">
@@ -378,8 +418,9 @@ const AdminAsignaturas: React.FC = () => {
             </div>
           </div>
         )}
-      </AdminLayout>
-    );
-  };
+      </div>
+    </AdminLayout>
+  );
+};
 
 export default AdminAsignaturas; 

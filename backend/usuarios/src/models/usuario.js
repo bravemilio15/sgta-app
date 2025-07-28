@@ -133,6 +133,38 @@ class Docente extends Usuario {
     this.titulos = Array.isArray(titulos) ? titulos : [titulos].filter(Boolean);
   }
 
+  // Método para agregar una asignatura al docente
+  agregarAsignatura(asignaturaUid) {
+    if (!this.asignaturasUid.includes(asignaturaUid)) {
+      this.asignaturasUid.push(asignaturaUid);
+    }
+  }
+
+  // Método para remover una asignatura del docente
+  removerAsignatura(asignaturaUid) {
+    this.asignaturasUid = this.asignaturasUid.filter(uid => uid !== asignaturaUid);
+  }
+
+  // Método para verificar si el docente tiene una asignatura específica
+  tieneAsignatura(asignaturaUid) {
+    return this.asignaturasUid.includes(asignaturaUid);
+  }
+
+  // Método para obtener el número de asignaturas que imparte
+  getNumeroAsignaturas() {
+    return this.asignaturasUid.length;
+  }
+
+  // Método para obtener todas las asignaturas del docente
+  obtenerAsignaturas() {
+    return this.asignaturasUid;
+  }
+
+  // Método para limpiar todas las asignaturas del docente
+  limpiarAsignaturas() {
+    this.asignaturasUid = [];
+  }
+
   // Método para convertir el objeto a JSON para Firestore
   toJSON() {
     return {

@@ -506,7 +506,7 @@ async function obtenerUsuariosPendientes(req, res) {
 // Obtener usuarios por tipo
 async function obtenerUsuariosPorTipo(req, res) {
   try {
-    const { tipo } = req.query;
+    const { tipo } = req.params; // Cambiar de req.query a req.params
     const db = admin.firestore();
     
     if (!tipo) {
@@ -687,16 +687,174 @@ async function registrarEstudianteConMatriculas(req, res) {
   }
 }
 
-module.exports = { 
-  registrarUsuario, 
-  registrarEstudianteConMatriculas,
-  aprobarUsuario, 
-  registrarAdministrador, 
-  registrarDocente, 
+// Obtener docentes con sus asignaturas
+async function obtenerDocentesConAsignaturas(req, res) {
+  try {
+    const db = admin.firestore();
+    const snapshot = await db.collection('usuarios')
+      .where('tipo', '==', 'docente')
+      .get();
+    
+    const docentes = [];
+    snapshot.forEach(doc => {
+      docentes.push({
+        uid: doc.id,
+        ...doc.data()
+      });
+    });
+    
+    res.json(docentes);
+  } catch (error) {
+    console.error('Error al obtener docentes con asignaturas:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Agregar asignatura a un docente
+async function agregarAsignaturaADocente(req, res) {
+  try {
+    const { docenteUid, asignaturaId } = req.body;
+
+    if (!docenteUid || !asignaturaId) {
+      return res.status(400).json({
+        error: 'docenteUid y asignaturaId son obligatorios'
+      });
+    }
+
+    const db = admin.firestore();
+    
+    // Verificar que el docente existe
+    const docenteDoc = await db.collection('usuarios').doc(docenteUid).get();
+    if (!docenteDoc.exists) {
+      return res.status(404).json({
+        error: 'Docente no encontrado'
+      });
+    }
+
+    const docente = docenteDoc.data();
+    if (docente.tipo !== 'docente') {
+      return res.status(400).json({
+        error: 'El usuario no es un docente'
+      });
+    }
+
+    // Agregar la asignatura al docente
+    await db.collection('usuarios').doc(docenteUid).update({
+      asignaturasUid: admin.firestore.FieldValue.arrayUnion(asignaturaId)
+    });
+
+    res.json({ 
+      message: 'Asignatura agregada al docente correctamente',
+      docenteUid,
+      asignaturaId
+    });
+  } catch (error) {
+    console.error('Error al agregar asignatura al docente:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Remover asignatura de un docente
+async function removerAsignaturaDeDocente(req, res) {
+  try {
+    const { docenteUid, asignaturaId } = req.body;
+
+    if (!docenteUid || !asignaturaId) {
+      return res.status(400).json({
+        error: 'docenteUid y asignaturaId son obligatorios'
+      });
+    }
+
+    const db = admin.firestore();
+    
+    // Verificar que el docente existe
+    const docenteDoc = await db.collection('usuarios').doc(docenteUid).get();
+    if (!docenteDoc.exists) {
+      return res.status(404).json({
+        error: 'Docente no encontrado'
+      });
+    }
+
+    // Remover la asignatura del docente
+    await db.collection('usuarios').doc(docenteUid).update({
+      asignaturasUid: admin.firestore.FieldValue.arrayRemove(asignaturaId)
+    });
+
+    res.json({ 
+      message: 'Asignatura removida del docente correctamente',
+      docenteUid,
+      asignaturaId
+    });
+  } catch (error) {
+    console.error('Error al remover asignatura del docente:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Obtener asignaturas de un docente específico
+async function obtenerAsignaturasDeDocente(req, res) {
+  try {
+    const { docenteUid } = req.params;
+
+    if (!docenteUid) {
+      return res.status(400).json({
+        error: 'docenteUid es obligatorio'
+      });
+    }
+
+    const db = admin.firestore();
+    
+    // Obtener el docente
+    const docenteDoc = await db.collection('usuarios').doc(docenteUid).get();
+    if (!docenteDoc.exists) {
+      return res.status(404).json({
+        error: 'Docente no encontrado'
+      });
+    }
+
+    const docente = docenteDoc.data();
+    const asignaturasUid = docente.asignaturasUid || [];
+
+    // Obtener información de las asignaturas
+    const asignaturas = [];
+    for (const asignaturaId of asignaturasUid) {
+      const asignaturaDoc = await db.collection('asignaturas').doc(asignaturaId).get();
+      if (asignaturaDoc.exists) {
+        asignaturas.push({
+          id: asignaturaId,
+          ...asignaturaDoc.data()
+        });
+      }
+    }
+
+    res.json({
+      docente: {
+        uid: docenteUid,
+        nombreCompleto: docente.nombreCompleto,
+        numeroAsignaturas: asignaturasUid.length
+      },
+      asignaturas
+    });
+  } catch (error) {
+    console.error('Error al obtener asignaturas del docente:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+module.exports = {
+  registrarUsuario,
+  aprobarUsuario,
+  registrarAdministrador,
+  registrarDocente,
   solicitarRecuperacionContrasena,
   cambiarContrasenaConToken,
-  obtenerUsuarioPorUid, 
+  obtenerUsuarioPorUid,
   obtenerUsuariosPendientes,
   obtenerUsuariosPorTipo,
-  obtenerEstadisticas
+  obtenerEstadisticas,
+  registrarEstudianteConMatriculas,
+  obtenerDocentesConAsignaturas,
+  agregarAsignaturaADocente,
+  removerAsignaturaDeDocente,
+  obtenerAsignaturasDeDocente
 };

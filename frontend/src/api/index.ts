@@ -4,7 +4,7 @@ const NOTIFICACIONES_API = 'http://localhost:3001/api';
 
 // Usuarios
 export async function registrarUsuario(datos: any) {
-  const response = await fetch(`${API_BASE}/usuarios/register`, {
+  const response = await fetch(`${API_BASE}/usuarios/registrar`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(datos)
@@ -27,7 +27,7 @@ export async function registrarEstudianteConMatriculas(datos: {
   asignaturasIds: string[];
   periodoId: string;
 }) {
-  const response = await fetch(`${API_BASE}/usuarios/register-with-matriculas`, {
+  const response = await fetch(`${API_BASE}/usuarios/registrar-estudiante-matriculas`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(datos)
@@ -36,21 +36,20 @@ export async function registrarEstudianteConMatriculas(datos: {
 }
 
 export async function aprobarUsuario(uid: string) {
-  const response = await fetch(`${API_BASE}/usuarios/approve`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify({ uid })
+  const response = await fetch(`${API_BASE}/usuarios/aprobar/${uid}`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' }
   });
   return response.json();
 }
 
 export async function obtenerUsuarioPorUid(uid: string) {
-  const response = await fetch(`${API_BASE}/usuarios/${uid}`);
+  const response = await fetch(`${API_BASE}/usuarios/usuario/${uid}`);
   return response.json();
 }
 
 export async function obtenerUsuariosPendientes() {
-  const response = await fetch(`${API_BASE}/usuarios?estado=Pendiente`);
+  const response = await fetch(`${API_BASE}/usuarios/pendientes`);
   return response.json();
 }
 
@@ -58,13 +57,13 @@ const API_BASE_URL = 'http://localhost:3003/api/tareas';
 
 // Obtener todos los estudiantes
 export async function obtenerEstudiantes() {
-  const response = await fetch(`${API_BASE}/usuarios?tipo=estudiante`);
+  const response = await fetch(`${API_BASE}/usuarios/por-tipo/estudiante`);
   return response.json();
 }
 
 // Obtener todos los docentes
 export async function obtenerDocentes() {
-  const response = await fetch(`${API_BASE}/usuarios?tipo=docente`);
+  const response = await fetch(`${API_BASE}/usuarios/por-tipo/docente`);
   return response.json();
 }
 
@@ -201,8 +200,18 @@ export async function crearAsignatura(datos: any) {
 }
 
 export async function obtenerAsignaturas() {
-  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/todas`);
-  return response.json();
+  try {
+    const response = await fetch(`${ASIGNATURAS_API}/asignaturas/todas`);
+    if (!response.ok) {
+      throw new Error(`Error al obtener asignaturas: ${response.status}`);
+    }
+    const data = await response.json();
+    console.log('Asignaturas obtenidas desde API:', data);
+    return data;
+  } catch (error) {
+    console.error('Error en obtenerAsignaturas:', error);
+    return [];
+  }
 }
 
 export async function obtenerAsignaturaPorId(id: string) {
@@ -254,6 +263,48 @@ export async function asignarDocenteAAsignatura(asignaturaId: string, docenteUid
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({ asignaturaId, docenteUid })
+  });
+  return response.json();
+}
+
+export async function removerDocenteDeAsignatura(asignaturaId: string) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/remover-docente`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ asignaturaId })
+  });
+  return response.json();
+}
+
+export async function obtenerDocentesDisponibles(maxAsignaturas: number = 5) {
+  const response = await fetch(`${ASIGNATURAS_API}/asignaturas/docentes-disponibles?maxAsignaturas=${maxAsignaturas}`);
+  return response.json();
+}
+
+export async function obtenerDocentesConAsignaturas() {
+  const response = await fetch(`${API_BASE}/usuarios/docentes-con-asignaturas`);
+  return response.json();
+}
+
+export async function obtenerAsignaturasDeDocente(docenteUid: string) {
+  const response = await fetch(`${API_BASE}/usuarios/docente/${docenteUid}/asignaturas`);
+  return response.json();
+}
+
+export async function agregarAsignaturaADocente(docenteUid: string, asignaturaId: string) {
+  const response = await fetch(`${API_BASE}/usuarios/agregar-asignatura-docente`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ docenteUid, asignaturaId })
+  });
+  return response.json();
+}
+
+export async function removerAsignaturaDeDocente(docenteUid: string, asignaturaId: string) {
+  const response = await fetch(`${API_BASE}/usuarios/remover-asignatura-docente`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ docenteUid, asignaturaId })
   });
   return response.json();
 }

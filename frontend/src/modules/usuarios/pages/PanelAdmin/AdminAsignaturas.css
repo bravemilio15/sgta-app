@@ -191,12 +191,21 @@
   align-items: center;
   gap: 0.5rem;
   font-size: 0.9rem;
-  color: #495057;
+  color: #6c757d;
+  margin-bottom: 0.5rem;
 }
 
 .asignatura-card-docente svg,
 .asignatura-card-estudiantes svg {
   color: #1a3fa6;
+  font-size: 1rem;
+}
+
+.asignatura-card-docente-info {
+  font-size: 0.8rem;
+  color: #28a745;
+  font-weight: 600;
+  margin-left: 0.5rem;
 }
 
 .asignatura-card-btn-asignar {
@@ -206,6 +215,7 @@
   padding: 0.5rem 1rem;
   border-radius: 6px;
   font-size: 0.9rem;
+  font-weight: 600;
   cursor: pointer;
   transition: background-color 0.3s ease;
   margin-top: 0.5rem;
@@ -214,6 +224,42 @@
 
 .asignatura-card-btn-asignar:hover {
   background: #218838;
+}
+
+.asignatura-card-btn-remover {
+  background: #dc3545;
+  color: white;
+  border: none;
+  padding: 0.5rem 1rem;
+  border-radius: 6px;
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+  margin-top: 0.5rem;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.asignatura-card-btn-remover:hover {
+  background: #c82333;
+}
+
+.form-help {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+  font-style: italic;
+}
+
+.form-help svg {
+  color: #1a3fa6;
 }
 
 .asignatura-info {
