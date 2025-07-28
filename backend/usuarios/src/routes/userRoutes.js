@@ -19,7 +19,15 @@ const {
   obtenerMatriculasEstudiante,
   crearMatricula,
   crearMatriculasMasivas,
-  asignarNotaUnidad
+  asignarNotaUnidad,
+  obtenerPeriodosAcademicos,
+  obtenerPeriodoActivo,
+  crearPeriodoAcademico,
+  actualizarPeriodoAcademico,
+  eliminarPeriodoAcademico,
+  activarPeriodoAcademico,
+  finalizarPeriodoAcademico,
+  obtenerPeriodosPorEstado
 } = require('../controllers/userController');
 
 // Rutas de registro
@@ -52,5 +60,15 @@ router.get('/matriculas/estudiante/:estudianteUid', obtenerMatriculasEstudiante)
 router.post('/matriculas', crearMatricula);
 router.post('/matriculas/masivas', crearMatriculasMasivas);
 router.put('/matriculas/:matriculaId/unidad', asignarNotaUnidad);
+
+// Rutas de períodos académicos
+router.get('/periodos-academicos', obtenerPeriodosAcademicos);
+router.get('/periodos-academicos/activo', obtenerPeriodoActivo);
+router.post('/periodos-academicos', crearPeriodoAcademico);
+router.put('/periodos-academicos/:id', actualizarPeriodoAcademico);
+router.delete('/periodos-academicos/:id', eliminarPeriodoAcademico);
+router.put('/periodos-academicos/:id/activar', activarPeriodoAcademico);
+router.put('/periodos-academicos/:id/finalizar', finalizarPeriodoAcademico);
+router.get('/periodos-academicos/estado/:estado', obtenerPeriodosPorEstado);
 
 module.exports = router;

@@ -953,6 +953,267 @@ async function asignarNotaUnidad(req, res) {
   }
 }
 
+// Obtener todos los períodos académicos
+async function obtenerPeriodosAcademicos(req, res) {
+  try {
+    const db = admin.firestore();
+    const periodosSnapshot = await db.collection('periodos_academicos').get();
+    
+    const periodos = [];
+    periodosSnapshot.forEach(doc => {
+      periodos.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+
+    res.json(periodos);
+  } catch (error) {
+    console.error('Error al obtener períodos académicos:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Obtener el período académico activo
+async function obtenerPeriodoActivo(req, res) {
+  try {
+    const db = admin.firestore();
+    const periodosSnapshot = await db.collection('periodos_academicos')
+      .where('estado', '==', 'ACTIVO')
+      .limit(1)
+      .get();
+
+    if (periodosSnapshot.empty) {
+      return res.status(404).json({ error: 'No hay período académico activo' });
+    }
+
+    const periodoDoc = periodosSnapshot.docs[0];
+    res.json({
+      id: periodoDoc.id,
+      ...periodoDoc.data()
+    });
+  } catch (error) {
+    console.error('Error al obtener período activo:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Crear un nuevo período académico
+async function crearPeriodoAcademico(req, res) {
+  try {
+    const { nombre, fechaInicio, fechaFin, tipo, estado, descripcion } = req.body;
+
+    if (!nombre || !fechaInicio || !fechaFin || !tipo || !estado) {
+      return res.status(400).json({
+        error: 'nombre, fechaInicio, fechaFin, tipo y estado son obligatorios'
+      });
+    }
+
+    const db = admin.firestore();
+    const periodoData = {
+      nombre,
+      fechaInicio,
+      fechaFin,
+      tipo,
+      estado,
+      descripcion: descripcion || '',
+      fechaCreacion: new Date().toISOString(),
+      fechaActualizacion: new Date().toISOString()
+    };
+
+    const periodoRef = await db.collection('periodos_academicos').add(periodoData);
+    periodoData.id = periodoRef.id;
+
+    res.status(201).json(periodoData);
+  } catch (error) {
+    console.error('Error al crear período académico:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Actualizar un período académico
+async function actualizarPeriodoAcademico(req, res) {
+  try {
+    const { id } = req.params;
+    const datos = req.body;
+
+    if (!id) {
+      return res.status(400).json({
+        error: 'ID del período es obligatorio'
+      });
+    }
+
+    const db = admin.firestore();
+    const periodoRef = db.collection('periodos_academicos').doc(id);
+    const periodoDoc = await periodoRef.get();
+
+    if (!periodoDoc.exists) {
+      return res.status(404).json({
+        error: 'Período académico no encontrado'
+      });
+    }
+
+    datos.fechaActualizacion = new Date().toISOString();
+    await periodoRef.update(datos);
+
+    res.json({
+      message: 'Período académico actualizado correctamente',
+      id
+    });
+  } catch (error) {
+    console.error('Error al actualizar período académico:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Eliminar un período académico
+async function eliminarPeriodoAcademico(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        error: 'ID del período es obligatorio'
+      });
+    }
+
+    const db = admin.firestore();
+    const periodoRef = db.collection('periodos_academicos').doc(id);
+    const periodoDoc = await periodoRef.get();
+
+    if (!periodoDoc.exists) {
+      return res.status(404).json({
+        error: 'Período académico no encontrado'
+      });
+    }
+
+    await periodoRef.delete();
+
+    res.json({
+      message: 'Período académico eliminado correctamente',
+      id
+    });
+  } catch (error) {
+    console.error('Error al eliminar período académico:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Activar un período académico
+async function activarPeriodoAcademico(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        error: 'ID del período es obligatorio'
+      });
+    }
+
+    const db = admin.firestore();
+    
+    // Desactivar todos los períodos
+    const periodosSnapshot = await db.collection('periodos_academicos').get();
+    const batch = db.batch();
+    
+    periodosSnapshot.docs.forEach(doc => {
+      batch.update(doc.ref, { estado: 'INACTIVO' });
+    });
+    
+    // Activar el período específico
+    const periodoRef = db.collection('periodos_academicos').doc(id);
+    const periodoDoc = await periodoRef.get();
+
+    if (!periodoDoc.exists) {
+      return res.status(404).json({
+        error: 'Período académico no encontrado'
+      });
+    }
+
+    batch.update(periodoRef, { 
+      estado: 'ACTIVO',
+      fechaActualizacion: new Date().toISOString()
+    });
+
+    await batch.commit();
+
+    res.json({
+      message: 'Período académico activado correctamente',
+      id
+    });
+  } catch (error) {
+    console.error('Error al activar período académico:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Finalizar un período académico
+async function finalizarPeriodoAcademico(req, res) {
+  try {
+    const { id } = req.params;
+
+    if (!id) {
+      return res.status(400).json({
+        error: 'ID del período es obligatorio'
+      });
+    }
+
+    const db = admin.firestore();
+    const periodoRef = db.collection('periodos_academicos').doc(id);
+    const periodoDoc = await periodoRef.get();
+
+    if (!periodoDoc.exists) {
+      return res.status(404).json({
+        error: 'Período académico no encontrado'
+      });
+    }
+
+    await periodoRef.update({
+      estado: 'FINALIZADO',
+      fechaActualizacion: new Date().toISOString()
+    });
+
+    res.json({
+      message: 'Período académico finalizado correctamente',
+      id
+    });
+  } catch (error) {
+    console.error('Error al finalizar período académico:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Obtener períodos por estado
+async function obtenerPeriodosPorEstado(req, res) {
+  try {
+    const { estado } = req.params;
+
+    if (!estado) {
+      return res.status(400).json({
+        error: 'Estado es obligatorio'
+      });
+    }
+
+    const db = admin.firestore();
+    const periodosSnapshot = await db.collection('periodos_academicos')
+      .where('estado', '==', estado)
+      .get();
+
+    const periodos = [];
+    periodosSnapshot.forEach(doc => {
+      periodos.push({
+        id: doc.id,
+        ...doc.data()
+      });
+    });
+
+    res.json(periodos);
+  } catch (error) {
+    console.error('Error al obtener períodos por estado:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   registrarUsuario,
   aprobarUsuario,
@@ -972,5 +1233,13 @@ module.exports = {
   obtenerMatriculasEstudiante,
   crearMatricula,
   crearMatriculasMasivas,
-  asignarNotaUnidad
+  asignarNotaUnidad,
+  obtenerPeriodosAcademicos,
+  obtenerPeriodoActivo,
+  crearPeriodoAcademico,
+  actualizarPeriodoAcademico,
+  eliminarPeriodoAcademico,
+  activarPeriodoAcademico,
+  finalizarPeriodoAcademico,
+  obtenerPeriodosPorEstado
 };
