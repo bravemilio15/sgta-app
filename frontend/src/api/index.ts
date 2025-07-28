@@ -629,13 +629,28 @@ export async function obtenerUsuariosParaTarea(tareaId: string, tipo: 'estudiant
 }
 
 export async function obtenerTareasPorAsignatura(asignaturaId: string, token: string) {
-  const response = await fetch(`${API_BASE_URL}/asignatura/${asignaturaId}`, {
-    headers: {
-      'Authorization': `Bearer ${token}`,
-      'Content-Type': 'application/json'
+  try {
+    console.log('Haciendo petición a:', `${API_BASE_URL}/asignatura/${asignaturaId}`);
+    const response = await fetch(`${API_BASE_URL}/asignatura/${asignaturaId}`, {
+      headers: {
+        'Authorization': `Bearer ${token}`,
+        'Content-Type': 'application/json'
+      }
+    });
+    
+    console.log('Respuesta del servidor:', response.status, response.statusText);
+    
+    if (!response.ok) {
+      throw new Error(`Error ${response.status}: ${response.statusText}`);
     }
-  });
-  return response.json();
+    
+    const data = await response.json();
+    console.log('Datos recibidos:', data);
+    return data;
+  } catch (error) {
+    console.error('Error en obtenerTareasPorAsignatura:', error);
+    throw error;
+  }
 }
 
 export async function obtenerEstadisticasUsuarioTareas(uid: string, token: string) {

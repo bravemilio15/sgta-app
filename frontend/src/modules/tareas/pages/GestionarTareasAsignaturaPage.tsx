@@ -19,6 +19,7 @@ const GestionarTareasAsignaturaPage = () => {
             if (user?.token && asignaturaId) {
                 try {
                     setLoading(true);
+                    console.log('Cargando tareas para asignatura:', asignaturaId);
                     
                     // Obtener información de la asignatura desde el estado de navegación
                     if (location.state?.asignatura) {
@@ -26,14 +27,51 @@ const GestionarTareasAsignaturaPage = () => {
                     }
                     
                     // Obtener tareas de la asignatura
-                    const tareasData = await obtenerTareasPorAsignatura(asignaturaId, user.token);
-                    setTareas(tareasData || []);
+                    try {
+                        const tareasData = await obtenerTareasPorAsignatura(asignaturaId, user.token);
+                        console.log('Tareas obtenidas:', tareasData);
+                        setTareas(tareasData || []);
+                    } catch (error) {
+                        console.error('Error al obtener tareas del servidor, usando datos mock:', error);
+                        // Datos mock temporales para mostrar que la página funciona
+                        setTareas([
+                            {
+                                id: 1,
+                                titulo: 'Tarea de Prueba 1',
+                                descripcion: 'Esta es una tarea de prueba para mostrar que la página funciona correctamente.',
+                                fechaInicio: '2024-01-15T10:00:00',
+                                fechaEntrega: '2024-01-20T23:59:00',
+                                tipoTarea: 'ACD',
+                                tareaTardia: false,
+                                diasEntregaTardia: 0,
+                                porcentacePenalizacion: 0,
+                                estado: 'pendiente',
+                                grupal: false
+                            },
+                            {
+                                id: 2,
+                                titulo: 'Tarea de Prueba 2',
+                                descripcion: 'Otra tarea de prueba para verificar el funcionamiento.',
+                                fechaInicio: '2024-01-16T10:00:00',
+                                fechaEntrega: '2024-01-25T23:59:00',
+                                tipoTarea: 'APE',
+                                tareaTardia: true,
+                                diasEntregaTardia: 2,
+                                porcentacePenalizacion: 10,
+                                estado: 'en_progreso',
+                                grupal: true
+                            }
+                        ]);
+                    }
                 } catch (error) {
                     console.error('Error al cargar tareas:', error);
                     setTareas([]);
                 } finally {
                     setLoading(false);
                 }
+            } else {
+                console.log('No se pudo cargar datos:', { user: !!user, token: !!user?.token, asignaturaId });
+                setLoading(false);
             }
         };
         cargarDatos();
@@ -91,6 +129,13 @@ const GestionarTareasAsignaturaPage = () => {
                     <h2>Tareas de la Asignatura</h2>
                     <span className="tareas-count">{tareas.length} tarea{tareas.length !== 1 ? 's' : ''}</span>
                 </div>
+                
+                {/* Mensaje informativo temporal */}
+                {tareas.length > 0 && tareas[0].titulo === 'Tarea de Prueba 1' && (
+                    <div className="mock-data-notice">
+                        <p>⚠️ Mostrando datos de prueba. El backend está siendo diagnosticado.</p>
+                    </div>
+                )}
 
                 {tareas.length === 0 ? (
                     <div className="no-tareas">

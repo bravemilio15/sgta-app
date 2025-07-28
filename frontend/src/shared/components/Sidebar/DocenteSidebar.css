@@ -1,7 +1,7 @@
 .docente-sidebar {
-  background: linear-gradient(135deg, #2c3e50 0%, #34495e 100%);
+  background: linear-gradient(135deg, #1a3fa6 0%, #152a7a 100%);
   color: #fff;
-  min-width: 250px;
+  min-width: 280px;
   height: 100vh;
   display: flex;
   flex-direction: column;
@@ -19,7 +19,7 @@
 .docente-sidebar-title {
   font-size: 1.3rem;
   font-weight: bold;
-  color: #3498db;
+  color: #ffffff;
   text-align: center;
 }
 
@@ -57,12 +57,12 @@
   background: rgba(255,255,255,0.1);
   text-decoration: none;
   color: #fff;
-  border-left-color: #3498db;
+  border-left-color: #ffffff;
 }
 
 .docente-sidebar-menu-link.active {
   background: rgba(255,255,255,0.15);
-  border-left-color: #3498db;
+  border-left-color: #ffffff;
   box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
 }
 
@@ -103,6 +103,86 @@
   background: linear-gradient(135deg, #c0392b 0%, #a93226 100%);
   transform: translateY(-1px);
   box-shadow: 0 4px 12px rgba(231,76,60,0.4);
+}
+
+/* Estilos para accesos rápidos */
+.docente-sidebar-section {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid rgba(255,255,255,0.1);
+}
+
+.docente-sidebar-section-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-size: 0.9rem;
+  font-weight: 600;
+  color: rgba(255,255,255,0.8);
+  margin-bottom: 0.5rem;
+  padding: 0 1rem;
+}
+
+.asignatura-link {
+  padding: 0.6rem 1rem !important;
+}
+
+.asignatura-link-content {
+  display: flex;
+  flex-direction: column;
+  gap: 0.2rem;
+  flex: 1;
+}
+
+.asignatura-name {
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: #fff;
+  line-height: 1.2;
+}
+
+.asignatura-code {
+    font-size: 0.75rem;
+    color: rgba(255,255,255,0.7);
+    font-weight: 400;
+}
+
+.current-asignatura {
+    background: rgba(255,255,255,0.2) !important;
+    border-left-color: #ffffff !important;
+    box-shadow: inset 0 0 10px rgba(255,255,255,0.1);
+}
+
+.current-indicator {
+    font-size: 0.7rem;
+    color: #4CAF50;
+    font-weight: 600;
+    margin-top: 0.2rem;
+    display: block;
+}
+
+.docente-sidebar-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 1rem;
+    color: rgba(255,255,255,0.7);
+    font-size: 0.8rem;
+}
+
+.loading-spinner {
+  width: 20px;
+  height: 20px;
+  border: 2px solid rgba(255,255,255,0.3);
+  border-top: 2px solid #fff;
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 /* Responsive */

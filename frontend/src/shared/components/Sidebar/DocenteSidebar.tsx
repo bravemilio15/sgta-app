@@ -8,13 +8,39 @@ import {
   FiLogOut,
   FiFileText,
   FiUsers,
-  FiSettings
+  FiSettings,
+  FiHome,
+  FiPlus
 } from 'react-icons/fi';
+import { useState, useEffect } from 'react';
+import { obtenerAsignaturasDeDocente } from '../../../api';
+import type { Asignatura } from '../../../modules/tareas/types';
 
 const DocenteSidebar = () => {
   const { user, setUser } = useUser();
   const navigate = useNavigate();
   const location = useLocation();
+  const [asignaturas, setAsignaturas] = useState<Asignatura[]>([]);
+  const [loadingAsignaturas, setLoadingAsignaturas] = useState(true);
+
+  useEffect(() => {
+    const cargarAsignaturas = async () => {
+      if (user?.uid) {
+        try {
+          setLoadingAsignaturas(true);
+          const response = await obtenerAsignaturasDeDocente(user.uid);
+          if (response.asignaturas) {
+            setAsignaturas(response.asignaturas.slice(0, 3)); // Solo mostrar las primeras 3
+          }
+        } catch (error) {
+          console.error('Error al cargar asignaturas:', error);
+        } finally {
+          setLoadingAsignaturas(false);
+        }
+      }
+    };
+    cargarAsignaturas();
+  }, [user]);
 
   const handleLogout = async () => {
     try {
@@ -28,12 +54,10 @@ const DocenteSidebar = () => {
   };
 
   const menuItems = [
-    { to: '/inicio-docente', label: 'Dashboard', icon: <FiBarChart2 />, exact: true },
-    { to: '/inicio-docente/tareas', label: 'Mis Tareas', icon: <FiFileText /> },
-    { to: '/inicio-docente/asignaturas', label: 'Mis Asignaturas', icon: <FiBook /> },
-    { to: '/inicio-docente/estudiantes', label: 'Mis Estudiantes', icon: <FiUsers /> },
-    { to: '/inicio-docente/reportes', label: 'Reportes', icon: <FiBarChart2 /> },
-    { to: '/inicio-docente/configuracion', label: 'Configuración', icon: <FiSettings /> },
+    { to: '/tareas/menu/inicio-docente', label: 'Inicio', icon: <FiHome />, exact: true },
+    { to: '/docente/tareas', label: 'Mis Tareas', icon: <FiFileText /> },
+    { to: '/reportes', label: 'Reportes', icon: <FiBarChart2 /> },
+    { to: '/notificaciones', label: 'Notificaciones', icon: <FiUsers /> },
   ];
 
   const isActive = (path: string, exact: boolean = false) => {
@@ -42,6 +66,10 @@ const DocenteSidebar = () => {
     }
     return location.pathname.startsWith(path);
   };
+
+  // Verificar si estamos en una página de asignatura específica
+  const isInAsignaturaPage = location.pathname.includes('/docente/asignatura/');
+  const currentAsignaturaId = location.pathname.split('/docente/asignatura/')[1]?.split('/')[0];
 
   if (!user || user.tipo !== 'docente') return null;
 
@@ -65,6 +93,48 @@ const DocenteSidebar = () => {
             </li>
           ))}
         </ul>
+        
+        {/* Accesos rápidos a asignaturas */}
+        {asignaturas.length > 0 && (
+          <div className="docente-sidebar-section">
+            <div className="docente-sidebar-section-title">
+              <FiBook />
+              Accesos Rápidos
+            </div>
+            <ul className="docente-sidebar-menu">
+              {asignaturas.map((asignatura) => {
+                const isCurrentAsignatura = currentAsignaturaId === asignatura.id;
+                return (
+                  <li key={asignatura.id} className="docente-sidebar-menu-item">
+                    <Link 
+                      to={`/docente/asignatura/${asignatura.id}/tareas`}
+                      className={`docente-sidebar-menu-link asignatura-link ${isCurrentAsignatura ? 'current-asignatura' : ''}`}
+                      state={{ asignatura }}
+                    >
+                      <span className="docente-sidebar-menu-icon">
+                        <FiFileText />
+                      </span>
+                      <div className="asignatura-link-content">
+                        <span className="asignatura-name">{asignatura.nombre}</span>
+                        <span className="asignatura-code">{asignatura.codigo}</span>
+                        {isCurrentAsignatura && (
+                          <span className="current-indicator">● Actual</span>
+                        )}
+                      </div>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        )}
+        
+        {loadingAsignaturas && (
+          <div className="docente-sidebar-loading">
+            <div className="loading-spinner"></div>
+            <span>Cargando asignaturas...</span>
+          </div>
+        )}
       </nav>
 
       <div className="docente-sidebar-footer">
