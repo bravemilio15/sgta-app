@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useUser } from '../../../../context/UserContext';
 import AdminLayout from '../../../../shared/components/Layout/AdminLayout';
 import Button from '../../../../shared/components/Button';
-import { obtenerEstudiantes, aprobarUsuario } from '../../../../api';
+import { obtenerEstudiantes, aprobarUsuario, obtenerMatriculasEstudiante, obtenerAsignaturas } from '../../../../api';
 import './AdminEstudiantes.css';
 
 interface Estudiante {
@@ -16,11 +16,20 @@ interface Estudiante {
   carrera: string;
   asignatura: string;
   estadoRegistro: string;
+  matriculas?: any[]; // Matrículas del estudiante
+}
+
+interface Asignatura {
+  id: string;
+  codigo: string;
+  nombre: string;
+  carrera: string;
 }
 
 const AdminEstudiantes = () => {
   const { user, loading } = useUser();
   const [estudiantes, setEstudiantes] = useState<Estudiante[]>([]);
+  const [asignaturas, setAsignaturas] = useState<Asignatura[]>([]);
   const [cargando, setCargando] = useState(true);
   const [mostrarFormulario, setMostrarFormulario] = useState(false);
   const [estudianteEditando, setEstudianteEditando] = useState<Estudiante | null>(null);
@@ -42,16 +51,135 @@ const AdminEstudiantes = () => {
 
   const cargarEstudiantes = async () => {
     try {
-      const datos = await obtenerEstudiantes();
+      setCargando(true);
+      
+      // Cargar estudiantes y asignaturas en paralelo
+      const [estudiantesData, asignaturasData] = await Promise.all([
+        obtenerEstudiantes(),
+        obtenerAsignaturas()
+      ]);
+      
+      console.log('Estudiantes cargados:', estudiantesData);
+      console.log('Asignaturas cargadas:', asignaturasData);
+      
       // Asegurar que datos sea un array
-      const estudiantesArray = Array.isArray(datos) ? datos : [];
+      const estudiantesArray = Array.isArray(estudiantesData) ? estudiantesData : [];
+      const asignaturasArray = Array.isArray(asignaturasData) ? asignaturasData : [];
+      
       setEstudiantes(estudiantesArray);
+      setAsignaturas(asignaturasArray);
       setCargando(false);
     } catch (error) {
-      console.error('Error cargando estudiantes:', error);
-      setEstudiantes([]); // Inicializar como array vacío en caso de error
+      console.error('Error cargando datos:', error);
+      setEstudiantes([]);
+      setAsignaturas([]);
       setCargando(false);
     }
+  };
+
+  const obtenerAsignaturasEstudiante = async (estudianteUid: string) => {
+    try {
+      const matriculas = await obtenerMatriculasEstudiante(estudianteUid);
+      console.log('Matrículas del estudiante:', matriculas);
+      
+      if (Array.isArray(matriculas) && matriculas.length > 0) {
+        // Extraer las asignaturas de todas las matrículas
+        const asignaturasMatriculadas: any[] = [];
+        
+        matriculas.forEach(matricula => {
+          if (matricula.asignaturas && Array.isArray(matricula.asignaturas)) {
+            matricula.asignaturas.forEach((asignatura: any) => {
+              if (asignatura.asignaturaId && asignatura.nombreAsignatura) {
+                asignaturasMatriculadas.push({
+                  id: asignatura.asignaturaId,
+                  codigo: asignatura.nombreAsignatura.split(' - ')[0] || asignatura.asignaturaId,
+                  nombre: asignatura.nombreAsignatura.split(' - ')[1] || asignatura.nombreAsignatura,
+                  estado: asignatura.estado
+                });
+              }
+            });
+          }
+        });
+        
+        console.log('Asignaturas matriculadas:', asignaturasMatriculadas);
+        
+        // Eliminar duplicados basándose en el ID
+        const asignaturasUnicas = asignaturasMatriculadas.filter((asignatura, index, self) => 
+          index === self.findIndex(a => a.id === asignatura.id)
+        );
+        
+        return asignaturasUnicas;
+      }
+      return [];
+    } catch (error) {
+      console.error('Error obteniendo asignaturas del estudiante:', error);
+      // Si es un error de índice de Firestore, mostrar mensaje específico
+      if (error instanceof Error && error.message && error.message.includes('FAILED_PRECONDITION')) {
+        console.log('Error de índice de Firestore - esto es normal en desarrollo');
+      }
+      return [];
+    }
+  };
+
+  const obtenerNombreAsignatura = (asignaturaId: string) => {
+    const asignatura = asignaturas.find(a => a.id === asignaturaId);
+    return asignatura ? `${asignatura.codigo} - ${asignatura.nombre}` : `ID: ${asignaturaId} (no encontrada)`;
+  };
+
+  // Componente para mostrar las asignaturas de un estudiante
+  const AsignaturasEstudiante = ({ estudianteUid }: { estudianteUid: string }) => {
+    const [asignaturasEstudiante, setAsignaturasEstudiante] = useState<Asignatura[]>([]);
+    const [cargandoAsignaturas, setCargandoAsignaturas] = useState(true);
+    const [error, setError] = useState<string | null>(null);
+
+    useEffect(() => {
+      const cargarAsignaturas = async () => {
+        try {
+          setCargandoAsignaturas(true);
+          setError(null);
+          
+          // Usar las asignaturas reales de las matrículas
+          const asignaturas = await obtenerAsignaturasEstudiante(estudianteUid);
+          setAsignaturasEstudiante(asignaturas);
+          
+        } catch (error) {
+          console.error('Error cargando asignaturas del estudiante:', error);
+          setError('Error al cargar asignaturas');
+          setAsignaturasEstudiante([]);
+        } finally {
+          setCargandoAsignaturas(false);
+        }
+      };
+
+      cargarAsignaturas();
+    }, [estudianteUid]);
+
+    if (cargandoAsignaturas) {
+      return <span className="cargando-asignaturas">Cargando...</span>;
+    }
+
+    if (error) {
+      return <span className="error-asignaturas">Error al cargar asignaturas</span>;
+    }
+
+    if (asignaturasEstudiante.length === 0) {
+      return <span className="no-asignaturas">Sin asignaturas matriculadas</span>;
+    }
+
+    return (
+      <div className="asignaturas-estudiante">
+        <div className="asignaturas-count">
+          {asignaturasEstudiante.length} asignatura(s)
+        </div>
+        <div className="asignaturas-details">
+          {asignaturasEstudiante.map((asignatura, index) => (
+            <span key={index} className="asignatura-tag">
+              {asignatura.codigo} - {asignatura.nombre}
+            </span>
+          ))}
+        </div>
+      </div>
+    );
   };
 
   const handleCrearEstudiante = () => {
@@ -203,7 +331,7 @@ const AdminEstudiantes = () => {
                 <th>Correo Institucional</th>
                 <th>Identificación</th>
                 <th>Carrera</th>
-                <th>Asignatura</th>
+                <th>Asignaturas</th>
                 <th>Estado</th>
                 <th>Fecha Registro</th>
                 <th>Acciones</th>
@@ -217,7 +345,9 @@ const AdminEstudiantes = () => {
                   <td>{estudiante.correoInstitucional}</td>
                   <td>{estudiante.identificacion}</td>
                   <td>{estudiante.carrera || 'Computación'}</td>
-                  <td>{estudiante.asignatura || 'No especificada'}</td>
+                  <td>
+                    <AsignaturasEstudiante estudianteUid={estudiante.uid} />
+                  </td>
                   <td>
                     <span className={`estado-badge ${estudiante.estado}`}>
                       {estudiante.estado}

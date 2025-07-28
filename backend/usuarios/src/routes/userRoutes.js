@@ -15,7 +15,11 @@ const {
   obtenerDocentesConAsignaturas,
   agregarAsignaturaADocente,
   removerAsignaturaDeDocente,
-  obtenerAsignaturasDeDocente
+  obtenerAsignaturasDeDocente,
+  obtenerMatriculasEstudiante,
+  crearMatricula,
+  crearMatriculasMasivas,
+  asignarNotaUnidad
 } = require('../controllers/userController');
 
 // Rutas de registro
@@ -42,5 +46,11 @@ router.get('/docentes-con-asignaturas', obtenerDocentesConAsignaturas);
 router.post('/agregar-asignatura-docente', agregarAsignaturaADocente);
 router.post('/remover-asignatura-docente', removerAsignaturaDeDocente);
 router.get('/docente/:docenteUid/asignaturas', obtenerAsignaturasDeDocente);
+
+// Rutas de matrículas
+router.get('/matriculas/estudiante/:estudianteUid', obtenerMatriculasEstudiante);
+router.post('/matriculas', crearMatricula);
+router.post('/matriculas/masivas', crearMatriculasMasivas);
+router.put('/matriculas/:matriculaId/unidad', asignarNotaUnidad);
 
 module.exports = router;

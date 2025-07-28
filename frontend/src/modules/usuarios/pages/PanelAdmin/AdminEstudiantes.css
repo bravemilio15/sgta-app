@@ -382,3 +382,55 @@
     min-width: 800px;
   }
 } 
+
+/* Estilos para las asignaturas del estudiante */
+.asignaturas-estudiante {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+
+.asignaturas-count {
+  font-size: 0.8rem;
+  color: #28a745;
+  font-weight: 600;
+  margin-bottom: 0.3rem;
+}
+
+.asignaturas-details {
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+}
+
+.asignatura-tag {
+  background: #e8f5e8;
+  color: #2e7d32;
+  padding: 0.3rem 0.6rem;
+  border-radius: 4px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  white-space: nowrap;
+  max-width: 200px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: inline-block;
+}
+
+.cargando-asignaturas {
+  color: #666;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.no-asignaturas {
+  color: #999;
+  font-size: 0.8rem;
+  font-style: italic;
+}
+
+.error-asignaturas {
+  color: #dc3545;
+  font-size: 0.8rem;
+  font-style: italic;
+} 

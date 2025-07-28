@@ -841,6 +841,118 @@ async function obtenerAsignaturasDeDocente(req, res) {
   }
 }
 
+// Obtener matrículas de un estudiante
+async function obtenerMatriculasEstudiante(req, res) {
+  try {
+    const { estudianteUid } = req.params;
+    const { periodoId } = req.query;
+
+    if (!estudianteUid) {
+      return res.status(400).json({
+        error: 'estudianteUid es obligatorio'
+      });
+    }
+
+    const MatriculaService = require('../services/matriculaService');
+    
+    let matriculas;
+    if (periodoId) {
+      // Obtener matrícula específica del período
+      const matricula = await MatriculaService.obtenerMatriculaEstudiante(estudianteUid, periodoId);
+      matriculas = matricula ? [matricula.toJSON()] : [];
+    } else {
+      // Obtener todas las matrículas del estudiante
+      matriculas = await MatriculaService.obtenerMatriculasEstudiante(estudianteUid);
+      matriculas = matriculas.map(matricula => matricula.toJSON());
+    }
+
+    res.json(matriculas);
+  } catch (error) {
+    console.error('Error al obtener matrículas del estudiante:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Crear una nueva matrícula
+async function crearMatricula(req, res) {
+  try {
+    const { estudianteUid, asignaturaId, periodoId } = req.body;
+
+    if (!estudianteUid || !asignaturaId || !periodoId) {
+      return res.status(400).json({
+        error: 'estudianteUid, asignaturaId y periodoId son obligatorios'
+      });
+    }
+
+    const MatriculaService = require('../services/matriculaService');
+    const matricula = await MatriculaService.crearMatricula(
+      estudianteUid, 
+      periodoId, 
+      [asignaturaId]
+    );
+
+    res.status(201).json({
+      message: 'Matrícula creada correctamente',
+      matricula: matricula.toJSON()
+    });
+  } catch (error) {
+    console.error('Error al crear matrícula:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Crear matrículas masivas
+async function crearMatriculasMasivas(req, res) {
+  try {
+    const { estudianteUid, asignaturasIds, periodoId } = req.body;
+
+    if (!estudianteUid || !asignaturasIds || !periodoId) {
+      return res.status(400).json({
+        error: 'estudianteUid, asignaturasIds y periodoId son obligatorios'
+      });
+    }
+
+    const MatriculaService = require('../services/matriculaService');
+    const matricula = await MatriculaService.crearMatricula(
+      estudianteUid, 
+      periodoId, 
+      asignaturasIds
+    );
+
+    res.status(201).json({
+      message: 'Matrículas masivas creadas correctamente',
+      matricula: matricula.toJSON()
+    });
+  } catch (error) {
+    console.error('Error al crear matrículas masivas:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
+// Asignar nota a una unidad
+async function asignarNotaUnidad(req, res) {
+  try {
+    const { matriculaId } = req.params;
+    const { tipoUnidad, nota } = req.body;
+
+    if (!matriculaId || !tipoUnidad || nota === undefined) {
+      return res.status(400).json({
+        error: 'matriculaId, tipoUnidad y nota son obligatorios'
+      });
+    }
+
+    const MatriculaService = require('../services/matriculaService');
+    await MatriculaService.asignarNotaUnidad(matriculaId, null, tipoUnidad, nota);
+
+    res.json({
+      message: 'Nota asignada correctamente'
+    });
+  } catch (error) {
+    console.error('Error al asignar nota:', error);
+    res.status(500).json({ error: error.message });
+  }
+}
+
 module.exports = {
   registrarUsuario,
   aprobarUsuario,
@@ -856,5 +968,9 @@ module.exports = {
   obtenerDocentesConAsignaturas,
   agregarAsignaturaADocente,
   removerAsignaturaDeDocente,
-  obtenerAsignaturasDeDocente
+  obtenerAsignaturasDeDocente,
+  obtenerMatriculasEstudiante,
+  crearMatricula,
+  crearMatriculasMasivas,
+  asignarNotaUnidad
 };

@@ -98,10 +98,55 @@ class MatriculaService {
         .orderBy('fechaMatricula', 'desc')
         .get();
 
+      if (matriculasSnapshot.empty) {
+        return [];
+      }
+
       const matriculas = [];
-      matriculasSnapshot.forEach(doc => {
-        matriculas.push(new Matricula({ id: doc.id, ...doc.data() }));
-      });
+      for (const doc of matriculasSnapshot.docs) {
+        const data = doc.data();
+        
+        // Limpiar datos duplicados y asegurar estructura consistente
+        const matriculaLimpia = {
+          id: doc.id,
+          estudianteUid: data.estudianteUid,
+          periodoId: data.periodoId,
+          fechaMatricula: data.fechaMatricula || data.fechaCreacion,
+          estado: data.estado || 'ACTIVA',
+          fechaCreacion: data.fechaCreacion,
+          fechaActualizacion: data.fechaActualizacion,
+          asignaturas: []
+        };
+
+        // Procesar asignaturas y eliminar duplicados
+        if (data.asignaturas && Array.isArray(data.asignaturas)) {
+          const asignaturasUnicas = new Map();
+          
+          data.asignaturas.forEach(asignatura => {
+            if (asignatura.asignaturaId) {
+              // Si ya existe, mantener la más reciente
+              if (!asignaturasUnicas.has(asignatura.asignaturaId) || 
+                  asignatura.fechaActualizacion > asignaturasUnicas.get(asignatura.asignaturaId).fechaActualizacion) {
+                asignaturasUnicas.set(asignatura.asignaturaId, {
+                  asignaturaId: asignatura.asignaturaId,
+                  nombreAsignatura: asignatura.nombreAsignatura,
+                  estado: asignatura.estado || 'MATRICULADA',
+                  unidadAA: asignatura.unidadAA || 0,
+                  unidadAPE: asignatura.unidadAPE || 0,
+                  unidadACD: asignatura.unidadACD || 0,
+                  notaTotal: asignatura.notaTotal || 0,
+                  fechaMatricula: asignatura.fechaMatricula || data.fechaMatricula,
+                  fechaActualizacion: asignatura.fechaActualizacion || data.fechaActualizacion
+                });
+              }
+            }
+          });
+          
+          matriculaLimpia.asignaturas = Array.from(asignaturasUnicas.values());
+        }
+
+        matriculas.push(new Matricula(matriculaLimpia));
+      }
 
       return matriculas;
     } catch (error) {
