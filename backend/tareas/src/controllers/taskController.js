@@ -20,6 +20,7 @@ const { notificarNuevaTarea, notificarCalificacion } = require('../services/noti
 const { Tarea, TiposTarea } = require('../models/tarea');
 const { Entrega, EstadosEntrega } = require('../models/entrega');
 const { Asignacion, TiposAsignacion } = require('../models/asignacion');
+const admin = require('firebase-admin');
 
 // Validaciones para crear tarea
 const validacionesCrearTarea = [
@@ -757,6 +758,161 @@ async function eliminarEntregaEstudiante(req, res) {
   }
 }
 
+// Obtener información de usuarios para tareas
+async function obtenerUsuariosParaTarea(req, res) {
+  try {
+    const { tareaId } = req.params;
+    const { tipo } = req.query; // 'estudiantes' o 'docente'
+
+    // Verificar que la tarea existe
+    const tarea = await obtenerTarea(tareaId);
+    if (!tarea) {
+      return res.status(404).json({ error: 'Tarea no encontrada' });
+    }
+
+    const db = admin.firestore();
+    let usuarios = [];
+
+    if (tipo === 'estudiantes') {
+      // Obtener estudiantes asignados a la tarea
+      const asignaciones = await obtenerAsignacionesPorTarea(tareaId);
+      const estudiantesIds = [...new Set(asignaciones.flatMap(a => a.destinatarios))];
+      
+      const estudiantesPromises = estudiantesIds.map(id => 
+        db.collection('usuarios').doc(id).get()
+      );
+      const estudiantesDocs = await Promise.all(estudiantesPromises);
+      
+      usuarios = estudiantesDocs.map(doc => ({
+        id: doc.id,
+        ...doc.data()
+      }));
+    } else if (tipo === 'docente') {
+      // Obtener información del docente
+      const docenteDoc = await db.collection('usuarios').doc(tarea.docenteId).get();
+      if (docenteDoc.exists) {
+        usuarios = [{
+          id: docenteDoc.id,
+          ...docenteDoc.data()
+        }];
+      }
+    }
+
+    res.json(usuarios);
+  } catch (error) {
+    console.error('Error al obtener usuarios para tarea:', error);
+    res.status(500).json({ error: 'Error al obtener usuarios' });
+  }
+}
+
+// Obtener tareas por asignatura
+async function obtenerTareasPorAsignatura(req, res) {
+  try {
+    const { asignaturaId } = req.params;
+    const { tipo } = req.query; // 'docente' o 'estudiante'
+
+    // Obtener todas las tareas del docente
+    const tareas = await obtenerTareasPorDocente(req.usuario.uid);
+    
+    // Filtrar por asignatura
+    const tareasAsignatura = tareas.filter(tarea => tarea.asignatura === asignaturaId);
+
+    // Enriquecer con información de asignaciones y entregas
+    const tareasConInfo = await Promise.all(tareasAsignatura.map(async (tarea) => {
+      const asignaciones = await obtenerAsignacionesPorTarea(tarea.id);
+      const entregas = await obtenerEntregasPorTarea(tarea.id);
+
+      const totalEstudiantes = asignaciones.reduce((sum, asig) => 
+        sum + asig.destinatarios.length, 0
+      );
+
+      return {
+        ...tarea,
+        totalEstudiantes,
+        entregasRecibidas: entregas.length,
+        entregasCalificadas: entregas.filter(e => e.estado === EstadosEntrega.CALIFICADA).length
+      };
+    }));
+
+    res.json(tareasConInfo);
+  } catch (error) {
+    console.error('Error al obtener tareas por asignatura:', error);
+    res.status(500).json({ error: 'Error al obtener las tareas' });
+  }
+}
+
+// Obtener estadísticas de usuario en tareas
+async function obtenerEstadisticasUsuarioTareas(req, res) {
+  try {
+    const { uid } = req.params;
+    const usuario = req.usuario;
+
+    // Verificar permisos
+    if (usuario.uid !== uid && usuario.tipo !== 'administrador') {
+      return res.status(403).json({ error: 'No tienes permisos para ver estas estadísticas' });
+    }
+
+    let estadisticas = {};
+
+    if (usuario.tipo === 'docente') {
+      // Estadísticas para docentes
+      const tareas = await obtenerTareasPorDocente(uid);
+      const totalTareas = tareas.length;
+      const tareasActivas = tareas.filter(t => t.estado === 'activa').length;
+      const tareasCompletadas = tareas.filter(t => t.estado === 'completada').length;
+
+      // Calcular entregas totales
+      let totalEntregas = 0;
+      let entregasCalificadas = 0;
+      
+      for (const tarea of tareas) {
+        const entregas = await obtenerEntregasPorTarea(tarea.id);
+        totalEntregas += entregas.length;
+        entregasCalificadas += entregas.filter(e => e.estado === EstadosEntrega.CALIFICADA).length;
+      }
+
+      estadisticas = {
+        totalTareas,
+        tareasActivas,
+        tareasCompletadas,
+        totalEntregas,
+        entregasCalificadas,
+        porcentajeCompletado: totalTareas > 0 ? (tareasCompletadas / totalTareas) * 100 : 0
+      };
+    } else if (usuario.tipo === 'estudiante') {
+      // Estadísticas para estudiantes
+      const tareas = await obtenerTareasEstudiante(uid);
+      const totalTareas = tareas.length;
+      const tareasPendientes = tareas.filter(t => t.estado === 'pendiente').length;
+      const tareasEntregadas = tareas.filter(t => t.estado === 'entregada').length;
+      const tareasCalificadas = tareas.filter(t => t.estado === 'calificada').length;
+
+      // Calcular promedio de calificaciones
+      const calificaciones = tareas
+        .filter(t => t.calificacion)
+        .map(t => t.calificacion);
+      
+      const promedioCalificacion = calificaciones.length > 0 
+        ? calificaciones.reduce((sum, cal) => sum + cal, 0) / calificaciones.length 
+        : 0;
+
+      estadisticas = {
+        totalTareas,
+        tareasPendientes,
+        tareasEntregadas,
+        tareasCalificadas,
+        promedioCalificacion,
+        porcentajeCompletado: totalTareas > 0 ? (tareasCalificadas / totalTareas) * 100 : 0
+      };
+    }
+
+    res.json(estadisticas);
+  } catch (error) {
+    console.error('Error al obtener estadísticas de usuario:', error);
+    res.status(500).json({ error: 'Error al obtener estadísticas' });
+  }
+}
+
 module.exports = {
   crearTareaDocente,
   editarTareaDocente,
@@ -773,5 +929,8 @@ module.exports = {
   obtenerEntregaEspecifica,
   actualizarEntregaEstudiante,
   eliminarEntregaEstudiante,
+  obtenerUsuariosParaTarea,
+  obtenerTareasPorAsignatura,
+  obtenerEstadisticasUsuarioTareas,
   validacionesCrearTarea
 };

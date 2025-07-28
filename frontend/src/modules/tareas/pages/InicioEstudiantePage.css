@@ -1,17 +1,58 @@
 .inicio-estudiante-container {
-    max-width: 1200px;
-    margin: 1rem auto;
-    margin-left: 300px;
-    margin-right: 20px;
-    padding: 1rem;
+  padding: 20px;
+  max-width: 1200px;
+  margin: 0 auto;
+  margin-left: 280px;
+  margin-right: 20px;
 }
 
-.inicio-estudiante-container h1,
-.inicio-estudiante-container h2 {
-    color: #333;
+.inicio-estudiante-header {
+  margin-bottom: 30px;
 }
 
-.tareas-pendientes,
-.tareas-calificadas {
-    margin-top: 2rem;
+.inicio-estudiante-title {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
+}
+
+.dashboard-sections {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 30px;
+  margin-top: 20px;
+}
+
+.dashboard-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.dashboard-section h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.3rem;
+  border-bottom: 2px solid #007bff;
+  padding-bottom: 10px;
+}
+
+.tareas-list {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.no-tareas {
+  text-align: center;
+  padding: 20px;
+  color: #666;
+  font-style: italic;
+}
+
+@media (max-width: 768px) {
+  .dashboard-sections {
+    grid-template-columns: 1fr;
+  }
 }

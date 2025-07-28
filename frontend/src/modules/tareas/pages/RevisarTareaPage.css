@@ -1,77 +1,139 @@
 .revisar-tarea-container {
-    padding: 2rem;
-    max-width: 1100px;
-    margin: auto;
-    margin-left: 300px;
-    margin-right: 20px;
+  padding: 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+  margin-left: 280px;
+  margin-right: 20px;
 }
 
-.revisar-tarea-container h1 {
-    color: #1a3fa6;
+.revisar-tarea-header {
+  margin-bottom: 30px;
 }
 
-.volver-btn {
-    background: #6c757d;
-    color: white;
-    border: none;
-    padding: 0.5rem 1rem;
-    border-radius: 5px;
-    cursor: pointer;
-    margin-bottom: 1rem;
+.revisar-tarea-title {
+  font-size: 2rem;
+  color: #333;
+  margin: 0;
 }
 
-.entregas-lista {
-    margin-top: 2rem;
-    display: flex;
-    flex-direction: column;
-    gap: 1.5rem;
+.tarea-info {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  margin-bottom: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
 }
 
-.entrega-card {
-    background: #fff;
-    padding: 1.5rem;
-    border-radius: 8px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-    display: flex;
-    justify-content: space-between;
-    gap: 1rem;
+.tarea-info h3 {
+  margin: 0 0 15px 0;
+  color: #333;
+  font-size: 1.3rem;
 }
 
-.entrega-info h4 {
-    margin: 0 0 0.5rem 0;
+.tarea-details {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 15px;
+  margin-bottom: 20px;
 }
 
-.archivos-entregados a {
-    display: block;
-    margin-top: 0.5rem;
-    color: #007bff;
-    text-decoration: none;
+.tarea-detail {
+  padding: 10px;
+  background: #f8f9fa;
+  border-radius: 4px;
+}
+
+.tarea-detail strong {
+  color: #333;
+  display: block;
+  margin-bottom: 5px;
+}
+
+.entregas-section {
+  background: white;
+  border-radius: 8px;
+  padding: 20px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.entregas-section h3 {
+  margin: 0 0 20px 0;
+  color: #333;
+  font-size: 1.3rem;
+}
+
+.entrega-item {
+  border: 1px solid #e0e0e0;
+  border-radius: 6px;
+  padding: 15px;
+  margin-bottom: 15px;
+  background: #f8f9fa;
+}
+
+.entrega-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 10px;
+}
+
+.estudiante-info {
+  font-weight: 600;
+  color: #333;
+}
+
+.entrega-fecha {
+  color: #666;
+  font-size: 0.9rem;
+}
+
+.entrega-content {
+  margin-bottom: 15px;
+}
+
+.entrega-comentarios {
+  font-style: italic;
+  color: #666;
+  margin-top: 10px;
 }
 
 .calificacion-form {
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-width: 250px;
+  min-width: 250px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
 }
 
 .calificacion-form input,
 .calificacion-form textarea {
-    padding: 0.5rem;
-    border: 1px solid #ccc;
-    border-radius: 4px;
+  padding: 8px 12px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 0.9rem;
 }
 
 .calificacion-form textarea {
-    min-height: 80px;
-    resize: vertical;
+  min-height: 80px;
+  resize: vertical;
 }
 
-.calificacion-form button {
-    background: #28a745;
-    color: white;
-    border: none;
-    padding: 0.6rem;
-    border-radius: 5px;
-    cursor: pointer;
+.calificar-btn {
+  background-color: #28a745;
+  color: white;
+  border: none;
+  padding: 10px 20px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+.calificar-btn:hover {
+  background-color: #218838;
+}
+
+.no-entregas {
+  text-align: center;
+  padding: 40px;
+  color: #666;
+  font-style: italic;
 }

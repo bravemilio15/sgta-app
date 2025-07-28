@@ -53,9 +53,9 @@ export async function obtenerUsuariosPendientes() {
   const response = await fetch(`${API_BASE}/usuarios?estado=Pendiente`);
   return response.json();
 }
+
 const API_BASE_URL = 'http://localhost:3003/api/tareas';
 
-<<<<<<<<< Temporary merge branch 1
 // Obtener todos los estudiantes
 export async function obtenerEstudiantes() {
   const response = await fetch(`${API_BASE}/usuarios?tipo=estudiante`);
@@ -76,39 +76,77 @@ export async function obtenerEstadisticas() {
 
 // Notificaciones
 export async function obtenerNotificaciones(uid: string) {
-  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}`);
-  return response.json();
+  try {
+    const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}`);
+    if (!response.ok) {
+      throw new Error('API no disponible');
+    }
+    return response.json();
+  } catch (error) {
+    console.error('Error al obtener notificaciones:', error);
+    // Retornar datos de ejemplo si la API no está disponible
+    return [
+      {
+        id: '1',
+        titulo: 'Bienvenido al sistema',
+        mensaje: 'Has sido registrado exitosamente en SGTA',
+        tipo: 'info',
+        fechaCreacion: new Date().toISOString(),
+        leida: false
+      }
+    ];
+  }
 }
 
 export async function marcarNotificacionLeida(notificacionId: string) {
-  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/${notificacionId}/leida`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' }
-  });
-  return response.json();
+  try {
+    const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/${notificacionId}/leida`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error al marcar notificación como leída:', error);
+    return { success: false, message: 'API no disponible' };
+  }
 }
 
 export async function marcarNotificacionNoLeida(notificacionId: string) {
-  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/${notificacionId}/no-leida`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' }
-  });
-  return response.json();
+  try {
+    const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/${notificacionId}/no-leida`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error al marcar notificación como no leída:', error);
+    return { success: false, message: 'API no disponible' };
+  }
 }
 
 export async function eliminarNotificacion(notificacionId: string) {
-  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/${notificacionId}`, {
-    method: 'DELETE'
-  });
-  return response.json();
+  try {
+    const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/${notificacionId}`, {
+      method: 'DELETE'
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error al eliminar notificación:', error);
+    return { success: false, message: 'API no disponible' };
+  }
 }
 
 export async function marcarTodasNotificacionesLeidas(uid: string) {
-  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}/marcar-todas-leidas`, {
-    method: 'PATCH',
-    headers: { 'Content-Type': 'application/json' }
-  });
-  return response.json();
+  try {
+    const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}/marcar-todas-leidas`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' }
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error al marcar todas las notificaciones como leídas:', error);
+    return { success: false, message: 'API no disponible' };
+  }
 }
 
 export async function crearNotificacion(datos: {
@@ -119,17 +157,27 @@ export async function crearNotificacion(datos: {
   remitenteUid?: string;
   accionUrl?: string;
 }) {
-  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json' },
-    body: JSON.stringify(datos)
-  });
-  return response.json();
+  try {
+    const response = await fetch(`${NOTIFICACIONES_API}/notificaciones`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(datos)
+    });
+    return response.json();
+  } catch (error) {
+    console.error('Error al crear notificación:', error);
+    return { success: false, message: 'API no disponible' };
+  }
 }
 
 export async function contarNotificacionesNoLeidas(uid: string) {
-  const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}/conteo-no-leidas`);
-  return response.json();
+  try {
+    const response = await fetch(`${NOTIFICACIONES_API}/notificaciones/usuario/${uid}/conteo-no-leidas`);
+    return response.json();
+  } catch (error) {
+    console.error('Error al contar notificaciones no leídas:', error);
+    return { count: 0 };
+  }
 }
 
 // Docentes
@@ -351,97 +399,251 @@ export async function asignarNotaUnidad(matriculaId: string, tipoUnidad: 'AA' | 
   return response.json();
 }
 
-=========
-// --- TAREAS ---
-
-// RF08: Obtener todas las tareas de un docente
-export const obtenerTareasDocente = async (token: string) => {
+// Tareas
+export async function obtenerTareasDocente(token: string) {
   const response = await fetch(`${API_BASE_URL}/docente`, {
-    headers: { 'Authorization': `Bearer ${token}` }
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
   });
   return response.json();
-};
+}
 
-// RF08: Crear una nueva tarea
-export const crearTarea = async (tarea: any, token: string) => {
-  const response = await fetch(API_BASE_URL, {
+export async function eliminarTarea(tareaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function crearTarea(datos: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(tarea)
+    body: JSON.stringify(datos)
   });
   return response.json();
-};
+}
 
-// RF08: Actualizar una tarea existente
-export const actualizarTarea = async (id: string, tarea: any, token: string) => {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
+export async function actualizarTarea(tareaId: string, datos: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}`, {
     method: 'PUT',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(tarea)
+    body: JSON.stringify(datos)
   });
   return response.json();
-};
+}
 
-// RF08: Eliminar una tarea
-export const eliminarTarea = async (id: string, token: string) => {
-  const response = await fetch(`${API_BASE_URL}/${id}`, {
-    method: 'DELETE',
-    headers: { 'Authorization': `Bearer ${token}` }
+export async function obtenerTarea(tareaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
   });
   return response.json();
-};
+}
 
-// RF09: Asignar una tarea
-export const asignarTarea = async (id: string, asignacion: any, token: string) => {
-  const response = await fetch(`${API_BASE_URL}/${id}/asignar`, {
+export async function obtenerDashboardEstudiante(token: string) {
+  const response = await fetch(`${API_BASE_URL}/estudiante/dashboard`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+// Entregas y calificaciones
+export async function calificarEntrega(entregaId: string, calificacion: number, comentarios: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}/calificar`, {
     method: 'POST',
     headers: {
-      'Content-Type': 'application/json',
-      'Authorization': `Bearer ${token}`
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
     },
-    body: JSON.stringify(asignacion)
+    body: JSON.stringify({ calificacion, comentarios })
   });
   return response.json();
-};
+}
 
+export async function obtenerEntregasTarea(tareaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/entregas`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
 
-// RF12: Gestionar entrega del estudiante
-export const gestionarEntrega = async (tareaId: string, formData: FormData, token: string) => {
+export async function entregarTarea(tareaId: string, datos: any, token: string) {
   const response = await fetch(`${API_BASE_URL}/${tareaId}/entregar`, {
     method: 'POST',
-    headers: { 'Authorization': `Bearer ${token}` },
-    body: formData
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datos)
   });
   return response.json();
-};
+}
 
-// RF14: Calificar una entrega
-export const calificarEntrega = async (entregaId: string, calificacion: any, token: string) => {
-    const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}/calificar`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-        },
-        body: JSON.stringify(calificacion)
-    });
-    return response.json();
-};
+export async function obtenerEntrega(entregaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
 
+export async function actualizarEntrega(entregaId: string, datos: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}`, {
+    method: 'PUT',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
 
-// --- ESTUDIANTE ---
+export async function eliminarEntrega(entregaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/entregas/${entregaId}`, {
+    method: 'DELETE',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
 
-// RF13: Obtener dashboard del estudiante
-export const obtenerDashboardEstudiante = async (token: string) => {
-    const response = await fetch(`${API_BASE_URL}/estudiante/dashboard`, {
-        headers: { 'Authorization': `Bearer ${token}` }
-    });
-    return response.json();
-};
->>>>>>>>> Temporary merge branch 2
+// Funciones adicionales faltantes
+export async function gestionarEntrega(tareaId: string, datos: any, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/entregar`, {
+    method: 'POST',
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    },
+    body: JSON.stringify(datos)
+  });
+  return response.json();
+}
+
+export async function obtenerEntregaPorEstudianteTarea(tareaId: string, estudianteId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/entregas/estudiante/${estudianteId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function obtenerDetalleTarea(tareaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/detalle`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+// Funciones de integración usuarios-tareas
+export async function obtenerUsuariosParaTarea(tareaId: string, tipo: 'estudiantes' | 'docente', token: string) {
+  const response = await fetch(`${API_BASE_URL}/${tareaId}/usuarios?tipo=${tipo}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function obtenerTareasPorAsignatura(asignaturaId: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/asignatura/${asignaturaId}`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+export async function obtenerEstadisticasUsuarioTareas(uid: string, token: string) {
+  const response = await fetch(`${API_BASE_URL}/usuarios/${uid}/estadisticas`, {
+    headers: {
+      'Authorization': `Bearer ${token}`,
+      'Content-Type': 'application/json'
+    }
+  });
+  return response.json();
+}
+
+// Función para obtener información completa de usuario con tareas
+export async function obtenerUsuarioConTareas(uid: string, token: string) {
+  try {
+    // Obtener información del usuario
+    const usuario = await obtenerUsuarioPorUid(uid);
+    
+    // Obtener estadísticas de tareas
+    const estadisticas = await obtenerEstadisticasUsuarioTareas(uid, token);
+    
+    return {
+      ...usuario,
+      estadisticas
+    };
+  } catch (error) {
+    console.error('Error al obtener usuario con tareas:', error);
+    throw error;
+  }
+}
+
+// Función para obtener asignaturas con tareas
+export async function obtenerAsignaturasConTareas(docenteUid: string, token: string) {
+  try {
+    // Obtener asignaturas del docente
+    const asignaturas = await obtenerAsignaturasPorDocente(docenteUid);
+    
+    // Para cada asignatura, obtener sus tareas
+    const asignaturasConTareas = await Promise.all(
+      asignaturas.map(async (asignatura: any) => {
+        try {
+          const tareas = await obtenerTareasPorAsignatura(asignatura.id, token);
+          return {
+            ...asignatura,
+            tareas
+          };
+        } catch (error) {
+          console.error(`Error al obtener tareas para asignatura ${asignatura.id}:`, error);
+          return {
+            ...asignatura,
+            tareas: []
+          };
+        }
+      })
+    );
+    
+    return asignaturasConTareas;
+  } catch (error) {
+    console.error('Error al obtener asignaturas con tareas:', error);
+    throw error;
+  }
+}
