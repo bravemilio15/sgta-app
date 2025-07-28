@@ -1,5 +1,6 @@
 const admin = require('firebase-admin');
 const { PeriodoAcademico, EstadoPeriodo, TipoPeriodo } = require('../models/periodoAcademico');
+const periodoAcademicoService = require('../services/periodoAcademicoService');
 const db = admin.firestore();
 
 // Crear un nuevo período académico
@@ -10,7 +11,6 @@ async function crearPeriodoAcademico(req, res) {
       fechaInicio,
       fechaFin,
       tipo = TipoPeriodo.TRIMESTRE,
-      estado = EstadoPeriodo.PLANIFICACION,
       descripcion = ''
     } = req.body;
 
@@ -47,15 +47,32 @@ async function crearPeriodoAcademico(req, res) {
       });
     }
 
-    // Crear el período académico
+    // Verificar solapamiento con otros períodos
+    const todosLosPeriodos = await periodosRef.get();
+    const nuevoPeriodo = new PeriodoAcademico({
+      nombre,
+      fechaInicio: inicio.toISOString(),
+      fechaFin: fin.toISOString(),
+      tipo,
+      descripcion
+    });
+
+    for (const doc of todosLosPeriodos.docs) {
+      const periodoExistente = new PeriodoAcademico({ id: doc.id, ...doc.data() });
+      if (nuevoPeriodo.seSolapaCon(periodoExistente)) {
+        return res.status(400).json({
+          error: 'El período se solapa con otro período académico existente'
+        });
+      }
+    }
+
+    // Crear el período académico (el estado se calcula automáticamente)
     const periodo = new PeriodoAcademico({
       nombre,
       fechaInicio: inicio.toISOString(),
       fechaFin: fin.toISOString(),
       tipo,
-      descripcion,
-      estado,
-      esActivo: estado === EstadoPeriodo.ACTIVO
+      descripcion
     });
 
     // Guardar en Firestore
@@ -105,6 +122,8 @@ async function obtenerPeriodosAcademicos(req, res) {
     
     snapshot.forEach(doc => {
       const periodo = new PeriodoAcademico({ id: doc.id, ...doc.data() });
+      // Actualizar el estado automáticamente antes de enviar
+      periodo.actualizarEstado();
       periodos.push(periodo.toJSON());
     });
 
@@ -137,6 +156,18 @@ async function obtenerPeriodoAcademico(req, res) {
 
     const periodo = new PeriodoAcademico({ id, ...periodoDoc.data() });
     
+    // Actualizar el estado automáticamente
+    const huboCambios = periodo.actualizarEstado();
+    
+    // Si hubo cambios, actualizar en la base de datos
+    if (huboCambios) {
+      await periodoRef.update({
+        estado: periodo.estado,
+        esActivo: periodo.esActivo,
+        fechaActualizacion: periodo.fechaActualizacion
+      });
+    }
+    
     res.json({
       periodo: periodo.toJSON()
     });
@@ -162,6 +193,18 @@ async function obtenerPeriodoActivo(req, res) {
 
     const periodoDoc = queryActivo.docs[0];
     const periodo = new PeriodoAcademico({ id: periodoDoc.id, ...periodoDoc.data() });
+    
+    // Actualizar el estado automáticamente
+    const huboCambios = periodo.actualizarEstado();
+    
+    // Si hubo cambios, actualizar en la base de datos
+    if (huboCambios) {
+      await periodoDoc.ref.update({
+        estado: periodo.estado,
+        esActivo: periodo.esActivo,
+        fechaActualizacion: periodo.fechaActualizacion
+      });
+    }
     
     res.json({
       periodo: periodo.toJSON()
@@ -199,10 +242,29 @@ async function actualizarPeriodoAcademico(req, res) {
           error: 'La fecha de inicio debe ser anterior a la fecha de fin'
         });
       }
+
+      // Verificar solapamiento con otros períodos
+      const todosLosPeriodos = await db.collection('periodos_academicos').get();
+      const periodoActualizado = new PeriodoAcademico({
+        ...periodoDoc.data(),
+        fechaInicio: fechaInicio.toISOString(),
+        fechaFin: fechaFin.toISOString()
+      });
+
+      for (const doc of todosLosPeriodos.docs) {
+        if (doc.id !== id) {
+          const periodoExistente = new PeriodoAcademico({ id: doc.id, ...doc.data() });
+          if (periodoActualizado.seSolapaCon(periodoExistente)) {
+            return res.status(400).json({
+              error: 'El período se solapa con otro período académico existente'
+            });
+          }
+        }
+      }
     }
 
     // Campos permitidos para actualizar
-    const camposPermitidos = ['nombre', 'fechaInicio', 'fechaFin', 'tipo', 'descripcion', 'estado'];
+    const camposPermitidos = ['nombre', 'fechaInicio', 'fechaFin', 'tipo', 'descripcion'];
     const datosParaActualizar = {};
     
     camposPermitidos.forEach(campo => {
@@ -232,7 +294,7 @@ async function actualizarPeriodoAcademico(req, res) {
   }
 }
 
-// Activar un período académico
+// Activar un período académico manualmente
 async function activarPeriodoAcademico(req, res) {
   try {
     const { id } = req.params;
@@ -282,7 +344,7 @@ async function activarPeriodoAcademico(req, res) {
   }
 }
 
-// Finalizar un período académico
+// Finalizar un período académico manualmente
 async function finalizarPeriodoAcademico(req, res) {
   try {
     const { id } = req.params;
@@ -369,6 +431,8 @@ async function obtenerPeriodosPorEstado(req, res) {
     
     snapshot.forEach(doc => {
       const periodo = new PeriodoAcademico({ id: doc.id, ...doc.data() });
+      // Actualizar el estado automáticamente
+      periodo.actualizarEstado();
       const periodoData = periodo.toJSON();
       
       switch (estado.toUpperCase()) {
@@ -410,6 +474,143 @@ async function obtenerPeriodosPorEstado(req, res) {
   }
 }
 
+// Nuevo endpoint para actualizar automáticamente todos los períodos
+async function actualizarEstadosPeriodos(req, res) {
+  try {
+    const snapshot = await db.collection('periodos_academicos').get();
+    const batch = db.batch();
+    let periodosActualizados = 0;
+    
+    snapshot.forEach(doc => {
+      const periodo = new PeriodoAcademico({ id: doc.id, ...doc.data() });
+      const huboCambios = periodo.actualizarEstado();
+      
+      if (huboCambios) {
+        batch.update(doc.ref, {
+          estado: periodo.estado,
+          esActivo: periodo.esActivo,
+          fechaActualizacion: periodo.fechaActualizacion
+        });
+        periodosActualizados++;
+      }
+    });
+    
+    if (periodosActualizados > 0) {
+      await batch.commit();
+    }
+    
+    res.json({
+      mensaje: `Estados actualizados automáticamente. ${periodosActualizados} períodos actualizados.`
+    });
+  } catch (error) {
+    console.error('Error al actualizar estados de períodos:', error);
+    res.status(500).json({
+      error: error.message
+    });
+  }
+}
+
+// Nuevo endpoint para obtener estadísticas de períodos académicos
+async function obtenerEstadisticasPeriodos(req, res) {
+  try {
+    const estadisticas = await periodoAcademicoService.obtenerEstadisticas();
+    
+    res.json({
+      estadisticas
+    });
+  } catch (error) {
+    console.error('Error al obtener estadísticas de períodos:', error);
+    res.status(500).json({
+      error: error.message
+    });
+  }
+}
+
+// Nuevo endpoint para verificar solapamientos
+async function verificarSolapamientos(req, res) {
+  try {
+    const solapamientos = await periodoAcademicoService.verificarSolapamientos();
+    
+    res.json({
+      solapamientos,
+      total: solapamientos.length
+    });
+  } catch (error) {
+    console.error('Error al verificar solapamientos:', error);
+    res.status(500).json({
+      error: error.message
+    });
+  }
+}
+
+// Nuevo endpoint para obtener períodos que necesitan actualización
+async function obtenerPeriodosParaActualizar(req, res) {
+  try {
+    const periodos = await periodoAcademicoService.obtenerPeriodosParaActualizar();
+    
+    res.json({
+      periodos,
+      total: periodos.length
+    });
+  } catch (error) {
+    console.error('Error al obtener períodos para actualizar:', error);
+    res.status(500).json({
+      error: error.message
+    });
+  }
+}
+
+// Nuevo endpoint para obtener el estado del servicio
+async function obtenerEstadoServicio(req, res) {
+  try {
+    const estado = periodoAcademicoService.obtenerEstadoServicio();
+    
+    res.json({
+      estado
+    });
+  } catch (error) {
+    console.error('Error al obtener estado del servicio:', error);
+    res.status(500).json({
+      error: error.message
+    });
+  }
+}
+
+// Nuevo endpoint para iniciar el servicio automático
+async function iniciarServicioAutomatico(req, res) {
+  try {
+    const { intervaloMinutos = 60 } = req.body;
+    
+    periodoAcademicoService.iniciarActualizacionAutomatica(intervaloMinutos);
+    
+    res.json({
+      mensaje: 'Servicio de actualización automática iniciado exitosamente',
+      intervaloMinutos
+    });
+  } catch (error) {
+    console.error('Error al iniciar servicio automático:', error);
+    res.status(500).json({
+      error: error.message
+    });
+  }
+}
+
+// Nuevo endpoint para detener el servicio automático
+async function detenerServicioAutomatico(req, res) {
+  try {
+    periodoAcademicoService.detenerActualizacionAutomatica();
+    
+    res.json({
+      mensaje: 'Servicio de actualización automática detenido exitosamente'
+    });
+  } catch (error) {
+    console.error('Error al detener servicio automático:', error);
+    res.status(500).json({
+      error: error.message
+    });
+  }
+}
+
 module.exports = {
   crearPeriodoAcademico,
   obtenerPeriodosAcademicos,
@@ -419,5 +620,12 @@ module.exports = {
   activarPeriodoAcademico,
   finalizarPeriodoAcademico,
   eliminarPeriodoAcademico,
-  obtenerPeriodosPorEstado
+  obtenerPeriodosPorEstado,
+  actualizarEstadosPeriodos,
+  obtenerEstadisticasPeriodos,
+  verificarSolapamientos,
+  obtenerPeriodosParaActualizar,
+  obtenerEstadoServicio,
+  iniciarServicioAutomatico,
+  detenerServicioAutomatico
 }; 

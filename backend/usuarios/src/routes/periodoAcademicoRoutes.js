@@ -9,7 +9,14 @@ const {
   activarPeriodoAcademico, 
   finalizarPeriodoAcademico, 
   eliminarPeriodoAcademico,
-  obtenerPeriodosPorEstado
+  obtenerPeriodosPorEstado,
+  actualizarEstadosPeriodos,
+  obtenerEstadisticasPeriodos,
+  verificarSolapamientos,
+  obtenerPeriodosParaActualizar,
+  obtenerEstadoServicio,
+  iniciarServicioAutomatico,
+  detenerServicioAutomatico
 } = require('../controllers/periodoAcademicoController');
 
 // Crear un nuevo período académico
@@ -23,6 +30,27 @@ router.get('/activo', obtenerPeriodoActivo);
 
 // Obtener períodos por estado (ACTUAL, PASADO, FUTURO)
 router.get('/estado/:estado', obtenerPeriodosPorEstado);
+
+// Obtener estadísticas de períodos académicos
+router.get('/estadisticas', obtenerEstadisticasPeriodos);
+
+// Verificar solapamientos entre períodos
+router.get('/verificar-solapamientos', verificarSolapamientos);
+
+// Obtener períodos que necesitan actualización
+router.get('/para-actualizar', obtenerPeriodosParaActualizar);
+
+// Obtener estado del servicio automático
+router.get('/estado-servicio', obtenerEstadoServicio);
+
+// Actualizar automáticamente todos los estados de períodos
+router.put('/actualizar-estados', actualizarEstadosPeriodos);
+
+// Iniciar servicio de actualización automática
+router.post('/servicio/iniciar', iniciarServicioAutomatico);
+
+// Detener servicio de actualización automática
+router.post('/servicio/detener', detenerServicioAutomatico);
 
 // Obtener un período académico específico
 router.get('/:id', obtenerPeriodoAcademico);

@@ -17,13 +17,9 @@ class MatriculaService {
       
       const periodo = new PeriodoAcademico({ id: periodoId, ...periodoDoc.data() });
       
-      if (!periodo.estaVigente()) {
-        throw new Error('El período académico no está vigente');
-      }
-
-      // Verificar que el período esté en período de matrículas
-      if (!periodo.estaEnPeriodoMatriculas()) {
-        throw new Error('No está en período de matrículas');
+      // Verificar que el período esté activo (simplificado)
+      if (!periodo.esActivo || periodo.estado !== EstadoPeriodo.ACTIVO) {
+        throw new Error('El período académico no está activo');
       }
       
       // Verificar que el estudiante no tenga ya una matrícula activa en este período
