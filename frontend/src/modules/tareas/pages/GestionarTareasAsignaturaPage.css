@@ -1,0 +1,387 @@
+.gestionar-tareas-container {
+    padding: 2rem;
+    margin-left: 280px;
+    margin-right: 20px;
+    min-height: 100vh;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    position: relative;
+    z-index: 1;
+}
+
+.gestionar-tareas-header {
+    margin-bottom: 2rem;
+}
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background: rgba(255, 255, 255, 0.95);
+    padding: 1.5rem;
+    border-radius: 15px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.volver-btn {
+    background: transparent;
+    border: 2px solid #667eea;
+    color: #667eea;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.volver-btn:hover {
+    background: #667eea;
+    color: white;
+    transform: translateY(-2px);
+}
+
+.asignatura-info {
+    text-align: center;
+    flex: 1;
+    margin: 0 2rem;
+}
+
+.asignatura-info h1 {
+    font-size: 2rem;
+    color: #333;
+    margin: 0 0 0.5rem 0;
+    font-weight: 700;
+}
+
+.asignatura-codigo {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.4rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+    display: inline-block;
+}
+
+.nueva-tarea-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 0.8rem 1.5rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.9rem;
+}
+
+.nueva-tarea-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.tareas-section {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 15px;
+    padding: 2rem;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+    backdrop-filter: blur(10px);
+    border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.tareas-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 2rem;
+    padding-bottom: 1rem;
+    border-bottom: 2px solid #f0f0f0;
+}
+
+.tareas-header h2 {
+    font-size: 1.5rem;
+    color: #333;
+    margin: 0;
+    font-weight: 600;
+}
+
+.tareas-count {
+    background: linear-gradient(135deg, #667eea, #764ba2);
+    color: white;
+    padding: 0.5rem 1rem;
+    border-radius: 20px;
+    font-size: 0.9rem;
+    font-weight: 600;
+}
+
+.no-tareas {
+    text-align: center;
+    padding: 3rem;
+    color: #666;
+}
+
+.no-tareas-icon {
+    font-size: 4rem;
+    margin-bottom: 1rem;
+}
+
+.no-tareas h3 {
+    font-size: 1.5rem;
+    margin-bottom: 0.5rem;
+    color: #333;
+}
+
+.no-tareas p {
+    font-size: 1rem;
+    margin-bottom: 2rem;
+    opacity: 0.8;
+}
+
+.crear-primera-tarea-btn {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    border: none;
+    padding: 1rem 2rem;
+    border-radius: 25px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 1rem;
+}
+
+.crear-primera-tarea-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(40, 167, 69, 0.4);
+}
+
+.tareas-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+    gap: 1.5rem;
+}
+
+.tarea-card {
+    background: white;
+    border-radius: 12px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    border: 1px solid #e0e0e0;
+    transition: all 0.3s ease;
+}
+
+.tarea-card:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.15);
+}
+
+.tarea-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    margin-bottom: 1rem;
+}
+
+.tarea-header h3 {
+    font-size: 1.2rem;
+    color: #333;
+    margin: 0;
+    font-weight: 600;
+    flex: 1;
+}
+
+.tarea-tipo {
+    padding: 0.3rem 0.8rem;
+    border-radius: 15px;
+    font-size: 0.8rem;
+    font-weight: 600;
+    margin-left: 1rem;
+}
+
+.tarea-acd {
+    background: #e3f2fd;
+    color: #1976d2;
+}
+
+.tarea-aa {
+    background: #f3e5f5;
+    color: #7b1fa2;
+}
+
+.tarea-ape {
+    background: #e8f5e8;
+    color: #388e3c;
+}
+
+.tarea-descripcion {
+    color: #666;
+    margin-bottom: 1rem;
+    line-height: 1.5;
+    font-size: 0.9rem;
+}
+
+.tarea-info {
+    margin-bottom: 1.5rem;
+}
+
+.info-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0.4rem 0;
+    border-bottom: 1px solid #f0f0f0;
+}
+
+.info-item:last-child {
+    border-bottom: none;
+}
+
+.info-label {
+    font-weight: 500;
+    color: #666;
+    font-size: 0.9rem;
+}
+
+.info-value {
+    font-weight: 600;
+    color: #333;
+    font-size: 0.9rem;
+}
+
+.estado-pendiente {
+    color: #ff9800;
+}
+
+.estado-en_progreso {
+    color: #2196f3;
+}
+
+.estado-completada {
+    color: #4caf50;
+}
+
+.tarea-actions {
+    display: flex;
+    gap: 0.5rem;
+    flex-wrap: wrap;
+}
+
+.tarea-actions button {
+    flex: 1;
+    padding: 0.6rem 1rem;
+    border: none;
+    border-radius: 8px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    font-size: 0.8rem;
+    min-width: 80px;
+}
+
+.editar-btn {
+    background: #2196f3;
+    color: white;
+}
+
+.editar-btn:hover {
+    background: #1976d2;
+    transform: translateY(-1px);
+}
+
+.revisar-btn {
+    background: #ff9800;
+    color: white;
+}
+
+.revisar-btn:hover {
+    background: #f57c00;
+    transform: translateY(-1px);
+}
+
+.eliminar-btn {
+    background: #f44336;
+    color: white;
+}
+
+.eliminar-btn:hover {
+    background: #d32f2f;
+    transform: translateY(-1px);
+}
+
+.loading-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 400px;
+    color: white;
+}
+
+.loading-spinner {
+    width: 50px;
+    height: 50px;
+    border: 4px solid rgba(255, 255, 255, 0.3);
+    border-top: 4px solid white;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    margin-bottom: 1rem;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    100% { transform: rotate(360deg); }
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .gestionar-tareas-container {
+        padding: 1rem;
+        margin-left: 0;
+        margin-right: 0;
+    }
+    
+    .header-content {
+        flex-direction: column;
+        gap: 1rem;
+        text-align: center;
+    }
+    
+    .asignatura-info {
+        margin: 0;
+        order: 2;
+    }
+    
+    .volver-btn {
+        order: 1;
+        align-self: flex-start;
+    }
+    
+    .nueva-tarea-btn {
+        order: 3;
+        align-self: stretch;
+    }
+    
+    .tareas-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .tarea-header {
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    
+    .tarea-tipo {
+        margin-left: 0;
+        margin-top: 0.5rem;
+    }
+    
+    .tarea-actions {
+        flex-direction: column;
+    }
+    
+    .tarea-actions button {
+        width: 100%;
+    }
+} 

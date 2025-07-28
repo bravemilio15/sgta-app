@@ -17,6 +17,7 @@ import Layout from '../shared/components/Layout/Layout';
 import AdminLayout from '../shared/components/Layout/AdminLayout';
 import InicioDocentePage from '../modules/tareas/pages/InicioDocentePage';
 import GestionarTareasPage from '../modules/tareas/pages/GestionarTareasPage';
+import GestionarTareasAsignaturaPage from '../modules/tareas/pages/GestionarTareasAsignaturaPage';
 import RevisarTareasPage from '../modules/tareas/pages/RevisarTareasPage';
 import InicioEstudiantePage from '../modules/tareas/pages/InicioEstudiantePage';
 import TareaEstudiantePage from '../modules/tareas/pages/TareaEstudiantePage';
@@ -196,6 +197,13 @@ export default function AppRouter() {
             <Route path="/docente/tareas/revisar/:id" element={
               <ProtectedRoute allowedTypes={['docente']}>
                 <Layout><RevisarTareasPage /></Layout>
+              </ProtectedRoute>
+            } />
+            
+            {/* Nueva ruta para gestionar tareas por asignatura */}
+            <Route path="/docente/asignatura/:asignaturaId/tareas" element={
+              <ProtectedRoute allowedTypes={['docente']}>
+                <Layout><GestionarTareasAsignaturaPage /></Layout>
               </ProtectedRoute>
             } />
             

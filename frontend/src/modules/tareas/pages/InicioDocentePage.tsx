@@ -1,54 +1,107 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { obtenerTareasDocente, eliminarTarea } from '../../../api';
+import { obtenerAsignaturasDeDocente } from '../../../api';
 import { useUser } from '../../../context/UserContext';
+import type { Asignatura } from '../types';
 import './InicioDocentePage.css';
 
 const InicioDocentePage = () => {
-    const [tareas, setTareas] = useState([]);
+    const [asignaturas, setAsignaturas] = useState<Asignatura[]>([]);
+    const [loading, setLoading] = useState(true);
     const { user } = useUser();
     const navigate = useNavigate();
 
     useEffect(() => {
-        const cargarTareas = async () => {
-            if (user && user.token) {
-                const tareasData = await obtenerTareasDocente(user.token);
-                setTareas(tareasData);
+        const cargarAsignaturas = async () => {
+            if (user && user.uid) {
+                try {
+                    setLoading(true);
+                    const response = await obtenerAsignaturasDeDocente(user.uid);
+                    if (response.asignaturas) {
+                        setAsignaturas(response.asignaturas);
+                    } else {
+                        setAsignaturas([]);
+                    }
+                } catch (error) {
+                    console.error('Error al cargar asignaturas:', error);
+                    setAsignaturas([]);
+                } finally {
+                    setLoading(false);
+                }
             }
         };
-        cargarTareas();
+        cargarAsignaturas();
     }, [user]);
 
-    const handleEliminar = async (id) => {
-        if (window.confirm('¿Estás seguro de que quieres eliminar esta tarea?')) {
-            await eliminarTarea(id, user.token);
-            setTareas(tareas.filter(t => t.id !== id));
-        }
+    const handleAsignaturaClick = (asignatura: Asignatura) => {
+        navigate(`/docente/asignatura/${asignatura.id}/tareas`, { 
+            state: { asignatura } 
+        });
     };
+
+    if (loading) {
+        return (
+            <div className="inicio-docente-container">
+                <div className="loading-container">
+                    <div className="loading-spinner"></div>
+                    <p>Cargando tus asignaturas...</p>
+                </div>
+            </div>
+        );
+    }
 
     return (
         <div className="inicio-docente-container">
             <header className="inicio-docente-header">
-                <h1>Mis Tareas</h1>
-                <button onClick={() => navigate('/docente/tareas/nueva')} className="nueva-tarea-btn">
-                    + Nueva Tarea
-                </button>
+                <h1>Mis Asignaturas</h1>
+                <p className="welcome-message">
+                    Bienvenido, {user?.nombreCompleto || 'Docente'}
+                </p>
             </header>
-            <div className="tareas-list">
-                {tareas.map(tarea => (
-                    <div key={tarea.id} className="tarea-card">
-                        <h3>{tarea.titulo}</h3>
-                        <p><strong>Asignatura:</strong> {tarea.asignatura}</p>
-                        <p><strong>Fecha de Entrega:</strong> {new Date(tarea.fechaEntrega).toLocaleDateString()}</p>
-                        <p><strong>Tipo:</strong> {tarea.tipo}</p>
-                        <div className="tarea-actions">
-                            <button onClick={() => navigate(`/docente/tareas/editar/${tarea.id}`)}>Editar</button>
-                            <button onClick={() => navigate(`/docente/tareas/revisar/${tarea.id}`)}>Revisar</button>
-                            <button onClick={() => handleEliminar(tarea.id)} className="eliminar-btn">Eliminar</button>
+
+            {asignaturas.length === 0 ? (
+                <div className="no-asignaturas">
+                    <div className="no-asignaturas-icon">📚</div>
+                    <h3>No tienes asignaturas asignadas</h3>
+                    <p>Contacta al administrador para que te asigne asignaturas.</p>
+                </div>
+            ) : (
+                <div className="asignaturas-grid">
+                    {asignaturas.map(asignatura => (
+                        <div 
+                            key={asignatura.id} 
+                            className="asignatura-card"
+                            onClick={() => handleAsignaturaClick(asignatura)}
+                        >
+                            <div className="asignatura-header">
+                                <h3>{asignatura.nombre}</h3>
+                                <span className="asignatura-codigo">{asignatura.codigo}</span>
+                            </div>
+                            <div className="asignatura-info">
+                                <div className="info-item">
+                                    <span className="info-label">Estudiantes:</span>
+                                    <span className="info-value">{asignatura.numeroEstudiantes || 0}</span>
+                                </div>
+                                <div className="info-item">
+                                    <span className="info-label">Carrera:</span>
+                                    <span className="info-value">{asignatura.carrera}</span>
+                                </div>
+                                <div className="info-item">
+                                    <span className="info-label">Estado:</span>
+                                    <span className={`info-value estado-${asignatura.estado?.toLowerCase() || 'asignada'}`}>
+                                        {asignatura.estado || 'ASIGNADA'}
+                                    </span>
+                                </div>
+                            </div>
+                            <div className="asignatura-actions">
+                                <button className="gestionar-btn">
+                                    Gestionar Tareas
+                                </button>
+                            </div>
                         </div>
-                    </div>
-                ))}
-            </div>
+                    ))}
+                </div>
+            )}
         </div>
     );
 };
